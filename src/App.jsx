@@ -1,20 +1,19 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';  // Change BrowserRouter to HashRouter
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Footer from './components/Footer';
-import Experience from './components/Experience';
+import About from './components/About';
 
 const App = () => {
   return (
-    <HashRouter>
-      <div className="min-h-screen bg-black"> {/* Added wrapper with background */}
-        <Navbar/>
-        <Routes>
-          <Route path="/" element={<Home/>}/>
-          <Route path="/experience" element={<Experience/>}/>
-        </Routes>
-        <Footer/>
-      </div>
+    <HashRouter>  {/* Changed from BrowserRouter to HashRouter */}
+      <Navbar/>
+      <Routes>
+        <Route path='/' element={<Home/>}/>
+        <Route path='/About' element={<About/>}/>
+
+      </Routes>
+      <Footer/>
     </HashRouter>
   );
 }

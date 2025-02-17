@@ -6,7 +6,7 @@ import Experience from './components/Experience';
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename='/Portfolio'>
       <Navbar/>
       <Routes>
         <Route path='/' element={<Home/>}/>

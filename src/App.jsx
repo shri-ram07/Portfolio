@@ -7,12 +7,14 @@ import Experience from './components/Experience';
 const App = () => {
   return (
     <HashRouter>
-      <Navbar/>
-      <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/experience' element={<Experience/>}/>
-      </Routes>
-      <Footer/>
+      <div className="min-h-screen bg-black"> {/* Added wrapper with background */}
+        <Navbar/>
+        <Routes>
+          <Route path="/" element={<Home/>}/>
+          <Route path="/experience" element={<Experience/>}/>
+        </Routes>
+        <Footer/>
+      </div>
     </HashRouter>
   );
 }

@@ -61,6 +61,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// AI Theme Colors
+				neon: {
+					blue: 'hsl(var(--neon-blue))',
+					green: 'hsl(var(--neon-green))',
+					purple: 'hsl(var(--neon-purple))'
+				},
+				cyber: {
+					dark: 'hsl(var(--cyber-dark))',
+					surface: 'hsl(var(--cyber-surface))',
+					border: 'hsl(var(--cyber-border))'
 				}
 			},
 			borderRadius: {
@@ -84,11 +95,57 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'neural-pulse': {
+					'0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+					'50%': { opacity: '1', transform: 'scale(1.05)' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'glow-pulse': {
+					'0%, 100%': { 
+						boxShadow: '0 0 5px hsl(var(--neon-blue) / 0.5)' 
+					},
+					'50%': { 
+						boxShadow: '0 0 20px hsl(var(--neon-blue) / 0.8), 0 0 30px hsl(var(--neon-blue) / 0.6)' 
+					}
+				},
+				'slide-in-up': {
+					from: {
+						opacity: '0',
+						transform: 'translateY(30px)'
+					},
+					to: {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'slide-in-right': {
+					from: {
+						opacity: '0',
+						transform: 'translateX(30px)'
+					},
+					to: {
+						opacity: '1',
+						transform: 'translateX(0)'
+					}
+				},
+				'rotate-y': {
+					from: { transform: 'rotateY(0deg)' },
+					to: { transform: 'rotateY(360deg)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'neural-pulse': 'neural-pulse 2s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite',
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+				'slide-in-up': 'slide-in-up 0.6s ease-out forwards',
+				'slide-in-right': 'slide-in-right 0.6s ease-out forwards',
+				'rotate-y': 'rotate-y 10s linear infinite'
 			}
 		}
 	},

@@ -1,73 +1,93 @@
-# Welcome to your Lovable project
+# 🚀 Shri Ram Dwivedi Portfolio
 
-## Project info
+Welcome to my personal portfolio!  
+Showcasing my expertise in Artificial Intelligence, Machine Learning, Computer Vision, NLP, and Full Stack Development.
 
-**URL**: https://lovable.dev/projects/25fe6f7c-8c17-47f1-be81-d2084c92aa81
+---
 
-## How can I edit this code?
+## 🖼️ Live Preview
 
-There are several ways of editing your application.
+Check out the live site: [Your Portfolio Link](https://your-portfolio-url.com)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/25fe6f7c-8c17-47f1-be81-d2084c92aa81) and start prompting.
+## 📦 Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend:** React, TypeScript, Tailwind CSS, Framer Motion
+- **Backend:** Flask, Node.js (for API integration)
+- **AI/ML:** TensorFlow, PyTorch, Scikit-Learn, NLTK, OpenCV
+- **Database:** MySQL, SQL
+- **Dev Tools:** Git/GitHub, Docker, Jupyter
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🏆 Featured Projects
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+| Project                       | Description                                                                 | Tech Used                                   | Link                                         |
+|-------------------------------|-----------------------------------------------------------------------------|---------------------------------------------|----------------------------------------------|
+| SymptomIQ                     | AI-powered health prediction and advice web app                             | Python, Flask, TensorFlow, Gemini API       | [GitHub](https://github.com/shri-ram07/SymptomIQ) |
+| Deep Fake Detector            | Real-time image deepfake detection tool                                     | Python, TensorFlow, Flask                   | [GitHub](https://github.com/shri-ram07/DeepFake-Detector) |
+| Fake News Detection (NLP)     | NLP-based fake news classifier                                              | Python, NLTK, Scikit-learn                  | [GitHub](https://github.com/shri-ram07/Fake-News-Detection-NLP) |
+| Automated Power Monitoring    | Computer vision-based energy optimization system                            | Python, OpenCV, IoT                         | [GitHub](https://github.com/shri-ram07/Automated-Power-Monitoring-System) |
+| Student Management System     | Tkinter-based student data management with MySQL integration                | Python, Tkinter, MySQL                      | [GitHub](https://github.com/shri-ram07/Student-Management-System) |
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 💡 Skills & Expertise
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **Programming Languages:** Python, C, SQL, JavaScript, HTML/CSS
+- **AI/ML Frameworks:** TensorFlow, PyTorch, Scikit-Learn, NLTK, OpenCV
+- **Specialized Skills:** Machine Learning, Deep Learning, Computer Vision, NLP, Data Analysis
+- **Development Tools:** Git/GitHub, Docker, Flask, MySQL, Jupyter
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 🥇 Certifications & Achievements
 
-**Edit a file directly in GitHub**
+- Advanced Python Certification (Tech Nook)
+- AI & ML Certification (Tech Nook)
+- Hackathon Participation (Kalinga Hackathon, Hackgenx)
+- Winner: Intra-Institutional Start-up Competition (Automated Power Monitoring System)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 📬 Contact
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Email:** your.email@example.com
+- **LinkedIn:** [Your LinkedIn](https://linkedin.com/in/yourprofile)
+- **GitHub:** [shri-ram07](https://github.com/shri-ram07)
+- **Phone:** +91 9329653872
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🛠️ Setup & Development
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/shri-ram07/portfolio.git
+   cd portfolio
+   ```
 
-## How can I deploy this project?
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Simply open [Lovable](https://lovable.dev/projects/25fe6f7c-8c17-47f1-be81-d2084c92aa81) and click on Share -> Publish.
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-## Can I connect a custom domain to my Lovable project?
+4. **Build for production**
+   ```bash
+   npm run build
+   ```
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📄 License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License.
+
+---
+

@@ -17,7 +17,10 @@ const ProjectsSection = () => {
         'Responsive web interface'
       ],
       icon: '🏥',
-      color: 'neon-green'
+      color: 'neon-green',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/shri-ram07/SymptomIQ' }
+      ]
     },
     {
       title: 'Deep Fake Detector',
@@ -31,7 +34,10 @@ const ProjectsSection = () => {
         'Confidence scoring system'
       ],
       icon: '🔍',
-      color: 'neon-purple'
+      color: 'neon-purple',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/shri-ram07/DeepFakeDetection' }
+      ]
     },
     {
       title: 'Fake News Detection System (NLP Project)',
@@ -45,7 +51,10 @@ const ProjectsSection = () => {
         'High accuracy classification'
       ],
       icon: '📰',
-      color: 'neon-blue'
+      color: 'neon-blue',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/shri-ram07/FakeNewsDetection' }
+      ]
     },
     {
       title: 'Automated Power Monitoring System',
@@ -59,7 +68,10 @@ const ProjectsSection = () => {
         'Computer vision-based monitoring'
       ],
       icon: '⚡',
-      color: 'neon-green'
+      color: 'neon-green',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/shri-ram07/AutomatedPowerMonitoringSystem' }
+      ]
     },
     {
       title: 'Student Management System',
@@ -73,7 +85,10 @@ const ProjectsSection = () => {
         'Database optimization'
       ],
       icon: '🎓',
-      color: 'neon-purple'
+      color: 'neon-purple',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/shri-ram07/Student-Management-System' }
+      ]
     }
   ];
 
@@ -150,19 +165,19 @@ const ProjectsSection = () => {
                   </div>
                   
                   <div className="flex space-x-3 pt-4">
-                    <Button 
-                      size="sm" 
-                      className={`gradient-primary hover:scale-105 transition-transform duration-300`}
-                    >
-                      View Details
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="neon-border hover:bg-neon-blue/10"
-                    >
-                      GitHub
-                    </Button>
+                    {project.links?.map((link, idx) => (
+                      <Button
+                        key={idx}
+                        size="sm"
+                        variant={link.label === 'GitHub' ? 'outline' : 'default'}
+                        className={link.label === 'GitHub' ? "neon-border hover:bg-neon-blue/10" : "gradient-primary hover:scale-105 transition-transform duration-300"}
+                        asChild
+                      >
+                        <a href={link.url} target="_blank" rel="noopener noreferrer">
+                          {link.label}
+                        </a>
+                      </Button>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

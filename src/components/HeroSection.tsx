@@ -6,7 +6,7 @@ const HeroSection = () => {
   const downloadResume = () => {
     // Create a link to download resume
     const link = document.createElement('a');
-    link.href = '#'; // Replace with actual resume URL
+    link.href = 'https://drive.google.com/file/d/10wtG7o3akcAEhSyHVkb0hJjzfztp_DBy/view?usp=sharing'; // Replace with actual resume URL
     link.download = 'Shri_Ram_Dwivedi_Resume.pdf';
     document.body.appendChild(link);
     link.click();
@@ -96,7 +96,7 @@ const HeroSection = () => {
                 📧 Email
               </a>
               <a
-                href="#"
+                href="https://www.linkedin.com/in/shri-ram-dwivedi-8a91a3272/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-neon-blue transition-colors duration-300"
@@ -104,7 +104,7 @@ const HeroSection = () => {
                 💼 LinkedIn
               </a>
               <a
-                href="#"
+                href="https://github.com/shri-ram07"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-neon-blue transition-colors duration-300"

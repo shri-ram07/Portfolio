@@ -131,13 +131,21 @@ const SkillsSection = () => {
                         <span className="font-medium">{skill.name}</span>
                         <span className="text-sm text-muted-foreground">{skill.level}%</span>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2">
+                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           whileInView={{ width: `${skill.level}%` }}
                           transition={{ duration: 1, delay: idx * 0.1 }}
                           viewport={{ once: true }}
-                          className={`bg-gradient-to-r from-${category.color} to-${category.color}/70 h-2 rounded-full`}
+                          className={
+                            `h-2 rounded-full ${
+                              category.color === 'neon-blue' ? 'bg-blue-500'
+                              : category.color === 'neon-green' ? 'bg-green-500'
+                              : category.color === 'neon-purple' ? 'bg-purple-500'
+                              : 'bg-gray-500'
+                            }`
+                          }
+                          style={{ width: `${skill.level}%` }}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">{skill.description}</p>

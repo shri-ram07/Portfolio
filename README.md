@@ -7,7 +7,7 @@ Showcasing my expertise in Artificial Intelligence, Machine Learning, Computer V
 
 ## 🖼️ Live Preview
 
-Check out the live site: [Your Portfolio Link](https://your-portfolio-url.com)
+Check out the live site: [Your Portfolio Link]([https://your-portfolio-url.com](https://portfolio-beta-gray-9ei2am6d1z.vercel.app/))
 
 ---
 

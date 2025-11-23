@@ -3,17 +3,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useForm, ValidationError } from '@formspree/react';
 
 const ContactSection = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
+  const [state, handleSubmit] = useForm("mjkzdpzp"); // Replace YOUR_FORM_ID with your actual Formspree form ID
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.succeeded) {
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your message. I'll get back to you soon!",
+      });
+      // Optional: Reset form fields if you were managing them with local state, 
+      // but Formspree handles the submission state.
+    }
+  }, [state.succeeded, toast]);
 
   const contactInfo = [
     {
@@ -46,33 +53,7 @@ const ContactSection = () => {
     }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Simulate form submission
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your message. I'll get back to you soon!",
-    });
-    
-    // Reset form
-    setFormData({ name: '', email: '', subject: '', message: '' });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  // Removed duplicate handleSubmit and handleInputChange functions as they are handled by Formspree
 
   return (
     <section id="contact" className="py-20 relative">
@@ -183,12 +164,16 @@ const ContactSection = () => {
                         Name *
                       </label>
                       <Input
+                        id="name"
                         name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
                         placeholder="Your full name"
                         className="neon-border bg-background/50 focus:bg-background/80"
                         required
+                      />
+                      <ValidationError 
+                        prefix="Name" 
+                        field="name"
+                        errors={state.errors}
                       />
                     </div>
                     <div>
@@ -196,13 +181,17 @@ const ContactSection = () => {
                         Email *
                       </label>
                       <Input
+                        id="email"
                         name="email"
                         type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
                         placeholder="your.email@example.com"
                         className="neon-border bg-background/50 focus:bg-background/80"
                         required
+                      />
+                      <ValidationError 
+                        prefix="Email" 
+                        field="email"
+                        errors={state.errors}
                       />
                     </div>
                   </div>
@@ -212,11 +201,15 @@ const ContactSection = () => {
                       Subject
                     </label>
                     <Input
+                      id="subject"
                       name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
                       placeholder="What's this about?"
                       className="neon-border bg-background/50 focus:bg-background/80"
+                    />
+                    <ValidationError 
+                      prefix="Subject" 
+                      field="subject"
+                      errors={state.errors}
                     />
                   </div>
                   
@@ -225,21 +218,26 @@ const ContactSection = () => {
                       Message *
                     </label>
                     <Textarea
+                      id="message"
                       name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
                       placeholder="Tell me about your project or idea..."
                       rows={6}
                       className="neon-border bg-background/50 focus:bg-background/80 resize-none"
                       required
                     />
+                    <ValidationError 
+                      prefix="Message" 
+                      field="message"
+                      errors={state.errors}
+                    />
                   </div>
                   
                   <Button
                     type="submit"
+                    disabled={state.submitting}
                     className="w-full gradient-primary hover:scale-105 transition-transform duration-300 py-3 text-lg font-semibold"
                   >
-                    Send Message
+                    {state.submitting ? 'Sending...' : 'Send Message'}
                   </Button>
                 </form>
               </CardContent>

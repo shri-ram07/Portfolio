@@ -3,22 +3,39 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const ExperienceSection = () => {
-  const experience = {
-    company: 'Realify Oasis',
-    position: 'AI Intern',
-    duration: 'Mar. 2025 – Present',
-    location: 'Remote',
-    description: 'Working on cutting-edge AI systems for real-time applications and autonomous workflows.',
-    achievements: [
-      'Built real-time action recognition systems using ST-GNN, LSTM, Transformers, and MediaPipe for multi-person tracking and gesture classification',
-      'Developed autonomous n8n workflows for chatbot memory, intent classification, and task automation',
-      'Created facial recognition systems for secure identity verification and access control',
-      'Designed anomaly detection systems using autoencoders to flag irregular movements in surveillance and fitness datasets',
-      'Engineered feedback systems using temporal enhancement and computer vision metrics for adaptive response generation',
-      'Optimized models for resource-constrained environments using quantization, batch inference, and hardware-aware tuning'
-    ],
-    technologies: ['Python', 'PyTorch', 'TensorFlow', 'MediaPipe', 'Computer Vision', 'NLP', 'Deep Learning']
-  };
+  const experiences = [
+    {
+      company: 'Ryze AI',
+      position: 'AI Engineer',
+      duration: 'Oct. 2025 – Present',
+      location: 'Remote',
+      description: 'Engineering full-fledged AI agents and scalable microservices on Google Cloud Platform.',
+      achievements: [
+        'Engineering a full-fledged Ads Specialist AI Agent integrating Google Gemini and multiple advertising/analytics APIs for autonomous campaign optimization and reporting',
+        'Designed LLM prompt frameworks for strategy generation, performance analysis, and multi-step reasoning aligned with paid ads workflows',
+        'Built backend services in Python (FastAPI) to orchestrate agent actions, API calls, user sessions, and secure authentication',
+        'Deployed scalable AI microservices on Google Cloud Platform (GCP) using Cloud Run and Virtual Machine',
+        'Implemented AI agent memory management for persistent user context, marketing insights, and long-term learning across interactions'
+      ],
+      technologies: ['Python', 'FastAPI', 'Google Gemini', 'GCP', 'Cloud Run', 'LLM', 'Advertising APIs'],
+      status: 'Current'
+    },
+    {
+      company: 'Realify Oasis',
+      position: 'AI Intern',
+      duration: 'Mar. – Oct. 2025 (8 Months)',
+      location: 'Remote',
+      description: 'Built real-time AI systems for action recognition, facial authentication, and autonomous workflows.',
+      achievements: [
+        'Built real-time action recognition systems using ST-GNN, LSTM, Transformers, and MediaPipe, enabling multi-person pose tracking and gesture classification',
+        'Developed Agentic AI pipelines by integrating n8n workflows with LLMs for memory management, intent classification, task execution, and autonomous chatbot behavior',
+        'Implemented facial authentication pipelines for secure identity verification and access control',
+        'Designed anomaly detection systems using autoencoders and temporal embeddings to flag abnormal movements in surveillance and fitness datasets'
+      ],
+      technologies: ['ST-GNN', 'LSTM', 'Transformers', 'MediaPipe', 'N8N', 'LLM', 'Computer Vision', 'Autoencoders'],
+      status: 'Completed'
+    }
+  ];
 
   const education = [
     {
@@ -72,50 +89,56 @@ const ExperienceSection = () => {
           className="mb-16"
         >
           <h3 className="text-3xl font-bold mb-8 neon-text">Professional Experience</h3>
-          <Card className="glass-morphism neon-border hover:bg-card/50 transition-all duration-300">
-            <CardContent className="p-8">
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6">
-                <div>
-                  <h4 className="text-2xl font-bold text-neon-blue mb-2">{experience.position}</h4>
-                  <p className="text-xl text-foreground mb-2">{experience.company} | {experience.location}</p>
-                  <p className="text-muted-foreground">{experience.duration}</p>
-                </div>
-                <Badge className="gradient-primary text-white mt-4 lg:mt-0">Current</Badge>
-              </div>
-              
-              <p className="text-lg text-muted-foreground mb-6">{experience.description}</p>
-              
-              <div className="mb-6">
-                <h5 className="text-lg font-semibold mb-4 text-neon-green">Key Achievements:</h5>
-                <ul className="space-y-3">
-                  {experience.achievements.map((achievement, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      viewport={{ once: true }}
-                      className="flex items-start space-x-3"
-                    >
-                      <span className="text-neon-blue mt-1">▶</span>
-                      <span className="text-muted-foreground">{achievement}</span>
-                    </motion.li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div>
-                <h5 className="text-lg font-semibold mb-4 text-neon-purple">Technologies Used:</h5>
-                <div className="flex flex-wrap gap-2">
-                  {experience.technologies.map((tech, index) => (
-                    <Badge key={index} variant="outline" className="neon-border">
-                      {tech}
+          <div className="space-y-8">
+            {experiences.map((experience, expIndex) => (
+              <Card key={expIndex} className="glass-morphism neon-border hover:bg-card/50 transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6">
+                    <div>
+                      <h4 className="text-2xl font-bold text-neon-blue mb-2">{experience.position}</h4>
+                      <p className="text-xl text-foreground mb-2">{experience.company} | {experience.location}</p>
+                      <p className="text-muted-foreground">{experience.duration}</p>
+                    </div>
+                    <Badge className={experience.status === 'Current' ? 'gradient-primary text-white mt-4 lg:mt-0' : 'bg-muted text-muted-foreground mt-4 lg:mt-0'}>
+                      {experience.status}
                     </Badge>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  </div>
+                  
+                  <p className="text-lg text-muted-foreground mb-6">{experience.description}</p>
+                  
+                  <div className="mb-6">
+                    <h5 className="text-lg font-semibold mb-4 text-neon-green">Key Achievements:</h5>
+                    <ul className="space-y-3">
+                      {experience.achievements.map((achievement, index) => (
+                        <motion.li
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                          viewport={{ once: true }}
+                          className="flex items-start space-x-3"
+                        >
+                          <span className="text-neon-blue mt-1">▶</span>
+                          <span className="text-muted-foreground">{achievement}</span>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h5 className="text-lg font-semibold mb-4 text-neon-purple">Technologies Used:</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {experience.technologies.map((tech, index) => (
+                        <Badge key={index} variant="outline" className="neon-border">
+                          {tech}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </motion.div>
 
         {/* Education Timeline */}

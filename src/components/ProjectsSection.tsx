@@ -6,6 +6,23 @@ import { Button } from '@/components/ui/button';
 const ProjectsSection = () => {
   const projects = [
     {
+      title: 'NeuroInsight AI – 3D Brain Tumor Segmentation',
+      duration: 'Aug. – Nov. 2025',
+      description: 'Designed and implemented a 3D U-Net based deep learning model for accurate brain tumor segmentation and ROI detection in volumetric MRI scans.',
+      technologies: ['Python', 'TensorFlow', 'PyTorch', '3D U-Net', 'Medical Imaging', 'Deep Learning', 'MRI Analysis'],
+      features: [
+        '3D volumetric MRI scan processing',
+        'Accurate tumor segmentation using U-Net architecture',
+        'Region of Interest (ROI) detection',
+        'High-precision medical imaging analysis'
+      ],
+      icon: '🧠',
+      color: 'neon-blue',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/shri-ram07/NeuroInsight' }
+      ]
+    },
+    {
       title: 'SymptomIQ',
       duration: 'Jan – Feb. 2025',
       description: 'Developed a Flask-based web application that predicts health conditions using a TensorFlow model and provides tailored advice via Google Gemini API, integrating geolocation with healthcare recommendations.',

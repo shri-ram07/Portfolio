@@ -4,31 +4,31 @@ import { Card, CardContent } from '@/components/ui/card';
 const AboutSection = () => {
   const stats = [
     { label: 'CGPA', value: '9.46/10', icon: '🎓' },
-    { label: 'Projects', value: '15+', icon: '🚀' },
-    { label: 'Hackathons', value: '24hrs', icon: '⚡' },
-    { label: 'Experience', value: '1+ Year', icon: '💼' }
+    { label: 'Projects', value: '16+', icon: '🚀' },
+    { label: 'Certifications', value: '5+', icon: '🏆' },
+    { label: 'Experience', value: '1.5+ Years', icon: '💼' }
   ];
 
   const highlights = [
     {
-      title: 'Education Excellence',
-      description: 'B.Tech Computer Science with AIML from Kalinga University, Raipur',
-      icon: '🎓'
+      title: 'AI Engineer at Ryze AI',
+      description: 'Currently building autonomous AI agents with LLM integration and deploying on GCP',
+      icon: '🚀'
     },
     {
-      title: 'AI Specialization',
-      description: 'Currently pursuing specialization in AI & Machine Learning (2023-2027)',
+      title: 'Medical AI Innovation',
+      description: 'Developed 3D U-Net models for brain tumor segmentation and MRI analysis',
       icon: '🧠'
     },
     {
-      title: 'Industry Experience',
-      description: 'AI Intern at Realify Oasis, working on real-time action recognition systems',
-      icon: '🔬'
+      title: 'Cloud & Backend Expert',
+      description: 'Building scalable AI microservices with FastAPI on Google Cloud Platform',
+      icon: '☁️'
     },
     {
-      title: 'Innovation Focus',
-      description: 'Passionate about automating complex workflows and solving real-world problems',
-      icon: '💡'
+      title: 'Agentic AI Specialist',
+      description: 'Creating autonomous AI workflows with N8N and LLM-powered chatbots',
+      icon: '🤖'
     }
   ];
 
@@ -119,9 +119,11 @@ const AboutSection = () => {
                   foundation (CGPA: 9.46/10), I've been consistently exploring the frontiers of AI technology.
                 </p>
                 <p>
-                  Currently working as an AI Intern at Realify Oasis, I'm developing real-time action recognition 
-                  systems using cutting-edge technologies like ST-GNN, LSTM, and Transformers. My expertise spans 
-                  across multiple domains including Computer Vision, Natural Language Processing, and Deep Learning.
+                  Currently working as an AI Engineer at Ryze AI, I'm engineering autonomous AI agents that integrate 
+                  Google Gemini and multiple APIs for real-world applications. I build scalable microservices with 
+                  FastAPI on Google Cloud Platform, specializing in LLM prompt frameworks, agentic AI pipelines, and 
+                  AI-powered automation. My experience includes developing 3D medical imaging models for brain tumor 
+                  segmentation and real-time action recognition systems using ST-GNN, LSTM, and Transformers.
                 </p>
                 <p>
                   When I'm not coding, you'll find me participating in hackathons, contributing to open-source 

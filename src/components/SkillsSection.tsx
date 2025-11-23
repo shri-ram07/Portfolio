@@ -7,49 +7,58 @@ const SkillsSection = () => {
     {
       title: 'Programming Languages',
       icon: '💻',
-      color: 'neon-blue',
+      color: 'blue',
+      gradient: 'from-blue-500 to-cyan-500',
       skills: [
-        { name: 'Python', level: 95, description: 'Data Structures, Web Dev' },
-        { name: 'C', level: 85, description: 'System Programming' },
-        { name: 'SQL', level: 88, description: 'Database Design' },
-        { name: 'JavaScript', level: 82, description: 'Web Development' },
-        { name: 'HTML/CSS', level: 90, description: 'Frontend Development' }
+        { name: 'Python', level: 95, tags: ['Data Structures', 'Web Dev', 'AI/ML'] },
+        { name: 'Java', level: 83, tags: ['OOP', 'Backend Development'] },
+        { name: 'C', level: 85, tags: ['System Programming', 'Memory Management'] },
+        { name: 'SQL', level: 88, tags: ['Database Design', 'Complex Queries'] },
+        { name: 'JavaScript', level: 82, tags: ['Web Development', 'Frontend'] },
+        { name: 'HTML/CSS', level: 90, tags: ['UI Design', 'Responsive Design'] }
       ]
     },
     {
       title: 'AI/ML Frameworks',
       icon: '🧠',
-      color: 'neon-green',
+      color: 'green',
+      gradient: 'from-green-500 to-emerald-500',
       skills: [
-        { name: 'TensorFlow', level: 92, description: 'Deep Learning' },
-        { name: 'PyTorch', level: 88, description: 'Neural Networks' },
-        { name: 'Scikit-Learn', level: 90, description: 'ML Algorithms' },
-        { name: 'NLTK', level: 85, description: 'Natural Language Processing' },
-        { name: 'OpenCV', level: 87, description: 'Computer Vision' }
+        { name: 'TensorFlow', level: 92, tags: ['Deep Learning', 'Model Training'] },
+        { name: 'PyTorch', level: 90, tags: ['Neural Networks', '3D Models'] },
+        { name: 'Transformers', level: 88, tags: ['NLP', 'LLM Integration'] },
+        { name: 'MediaPipe', level: 87, tags: ['Pose Estimation', 'Gesture Recognition'] },
+        { name: 'ST-GNN', level: 85, tags: ['Spatial-Temporal', 'Action Recognition'] },
+        { name: 'OpenCV', level: 87, tags: ['Computer Vision', 'Image Processing'] },
+        { name: 'Scikit-Learn', level: 90, tags: ['ML Algorithms', 'Data Mining'] }
       ]
     },
     {
-      title: 'Development Tools',
-      icon: '🛠️',
-      color: 'neon-purple',
+      title: 'Backend & Cloud',
+      icon: '☁️',
+      color: 'purple',
+      gradient: 'from-purple-500 to-pink-500',
       skills: [
-        { name: 'Git/GitHub', level: 90, description: 'Version Control' },
-        { name: 'Docker', level: 75, description: 'Containerization' },
-        { name: 'Flask', level: 88, description: 'Web Framework' },
-        { name: 'MySQL', level: 85, description: 'Database Management' },
-        { name: 'Jupyter', level: 92, description: 'Data Science' }
+        { name: 'FastAPI', level: 90, tags: ['RESTful APIs', 'Microservices'] },
+        { name: 'Flask', level: 88, tags: ['Web Applications', 'Backend'] },
+        { name: 'Google Cloud Platform', level: 85, tags: ['Cloud Run', 'VM Deployment'] },
+        { name: 'N8N', level: 80, tags: ['Workflow Automation', 'Agentic AI'] },
+        { name: 'MySQL', level: 85, tags: ['DBMS', 'Query Optimization'] },
+        { name: 'Git/GitHub', level: 90, tags: ['Version Control', 'Collaboration'] }
       ]
     },
     {
-      title: 'Specialized Skills',
+      title: 'AI Specializations',
       icon: '⚡',
-      color: 'neon-blue',
+      color: 'orange',
+      gradient: 'from-orange-500 to-red-500',
       skills: [
-        { name: 'Machine Learning', level: 94, description: 'Model Development' },
-        { name: 'Deep Learning', level: 90, description: 'Neural Networks' },
-        { name: 'Computer Vision', level: 88, description: 'Image Processing' },
-        { name: 'NLP', level: 86, description: 'Text Analysis' },
-        { name: 'Data Analysis', level: 89, description: 'Statistical Analysis' }
+        { name: 'LLM Integration', level: 92, tags: ['Google Gemini', 'Prompt Engineering'] },
+        { name: 'Agentic AI', level: 88, tags: ['Autonomous Systems', 'Memory Management'] },
+        { name: 'Computer Vision', level: 90, tags: ['Real-time Processing', 'Object Detection'] },
+        { name: '3D Medical Imaging', level: 85, tags: ['Tumor Segmentation', 'ROI Analysis'] },
+        { name: 'NLP', level: 88, tags: ['Intent Classification', 'Text Analysis'] },
+        { name: 'Anomaly Detection', level: 87, tags: ['Autoencoders', 'Temporal Embeddings'] }
       ]
     }
   ];
@@ -57,30 +66,42 @@ const SkillsSection = () => {
   const certifications = [
     {
       title: 'Advanced Python Certification',
-      issuer: 'Tech Nook',
-      description: 'Data structures, memory management, complex queries, and performance optimization',
+      issuer: 'HackerRank',
+      description: 'Data structures, memory management, complex algorithms, and performance optimization',
       icon: '🐍'
     },
     {
+      title: 'C Programming Certification',
+      issuer: 'HackerRank',
+      description: 'System programming, memory management, and advanced C concepts',
+      icon: '⚙️'
+    },
+    {
+      title: 'SQL Certification',
+      issuer: 'HackerRank',
+      description: 'Complex queries, database design, and performance optimization',
+      icon: '🗄️'
+    },
+    {
       title: 'AI & ML Certification',
-      issuer: 'Tech Nook',
+      issuer: 'Teach Nook',
       description: 'Supervised/unsupervised learning, neural networks, and deep learning fundamentals',
       icon: '🤖'
     },
     {
       title: 'Hackathon Participation',
-      issuer: 'Various Events',
-      description: 'National level 24 hours Hackathon - Kalinga Hackathon & Hackgenx Hackathon',
+      issuer: 'National Level Events',
+      description: '24 hours Hackathons - Kalinga Hackathon, Hackomania & Hackgenx Hackathon',
       icon: '🏆'
     }
   ];
 
   const achievements = [
-    'Won the Intra-Institutional Start-up Competition for developing an Automated Power Monitoring System',
-    'Participated in National level 24 hours Hackathons',
-    'Completed advanced certifications in Python, C, and SQL',
-    'Earned AI & ML certification mastering supervised/unsupervised learning',
-    'Demonstrated expertise in rapport building, effective communication, and collaborative team leadership'
+    'Winner of Intra-Institutional Start-up Competition for Automated Power Monitoring System leveraging computer vision',
+    'Active participant in National-level 24-hour Hackathons including Kalinga Hackathon, Hackomania, and Hackgenx',
+    'HackerRank certified in Python, C, and SQL demonstrating proficiency in data structures and algorithm optimization',
+    'Certified in AI & ML from Teach Nook, covering supervised/unsupervised learning, neural architectures, and deep learning frameworks',
+    'Strong foundation in collaborative development, technical communication, and cross-functional team coordination'
   ];
 
   return (
@@ -94,11 +115,10 @@ const SkillsSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Skills & <span className="neon-text">Expertise</span>
+            Technical <span className="neon-text">Proficiencies</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            A comprehensive overview of my technical skills, certifications, and professional capabilities 
-            in artificial intelligence and software development.
+            Comprehensive technical skill set spanning AI/ML frameworks, cloud infrastructure, and production-grade development tools for building scalable intelligent systems.
           </p>
         </motion.div>
 
@@ -112,44 +132,57 @@ const SkillsSection = () => {
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="glass-morphism neon-border hover:bg-card/50 transition-all duration-300 h-full">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className={`text-3xl p-2 rounded-lg bg-${category.color}/10 border border-${category.color}/30`}>
-                      {category.icon}
+              <Card className="glass-morphism neon-border hover:shadow-2xl transition-all duration-500 h-full group">
+                <CardHeader className="pb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`text-4xl p-3 rounded-xl bg-gradient-to-br ${category.gradient} bg-opacity-10 group-hover:scale-110 transition-transform duration-300`}>
+                        {category.icon}
+                      </div>
+                      <CardTitle className="text-2xl font-bold bg-gradient-to-r ${category.gradient} bg-clip-text text-transparent">
+                        {category.title}
+                      </CardTitle>
                     </div>
-                    <CardTitle className={`text-xl font-bold text-${category.color}`}>
-                      {category.title}
-                    </CardTitle>
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-5">
                   {category.skills.map((skill, idx) => (
-                    <div key={idx} className="space-y-2">
+                    <motion.div 
+                      key={idx} 
+                      className="space-y-2.5 p-3 rounded-lg hover:bg-accent/5 transition-colors duration-200"
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: idx * 0.05 }}
+                      viewport={{ once: true }}
+                    >
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">{skill.name}</span>
-                        <span className="text-sm text-muted-foreground">{skill.level}%</span>
+                        <span className="font-semibold text-lg">{skill.name}</span>
+                        <Badge variant="secondary" className="text-xs font-mono">
+                          {skill.level}%
+                        </Badge>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden border border-muted">
                         <motion.div
                           initial={{ width: 0 }}
                           whileInView={{ width: `${skill.level}%` }}
-                          transition={{ duration: 1, delay: idx * 0.1 }}
+                          transition={{ duration: 1.2, delay: idx * 0.05, ease: "easeOut" }}
                           viewport={{ once: true }}
-                          className={
-                            `h-2 rounded-full ${
-                              category.color === 'neon-blue' ? 'bg-blue-500'
-                              : category.color === 'neon-green' ? 'bg-green-500'
-                              : category.color === 'neon-purple' ? 'bg-purple-500'
-                              : 'bg-gray-500'
-                            }`
-                          }
-                          style={{ width: `${skill.level}%` }}
+                          className={`h-full rounded-full bg-gradient-to-r ${category.gradient} shadow-lg`}
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground">{skill.description}</p>
-                    </div>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {skill.tags.map((tag, tagIdx) => (
+                          <Badge 
+                            key={tagIdx} 
+                            variant="outline" 
+                            className="text-xs px-2 py-0.5 bg-background/50"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </motion.div>
                   ))}
                 </CardContent>
               </Card>
@@ -166,7 +199,7 @@ const SkillsSection = () => {
           className="mb-16"
         >
           <h3 className="text-3xl font-bold mb-8 text-center neon-text">Certifications</h3>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {certifications.map((cert, index) => (
               <motion.div
                 key={index}

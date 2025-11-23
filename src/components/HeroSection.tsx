@@ -6,7 +6,7 @@ const HeroSection = () => {
   const downloadResume = () => {
     // Create a link to download resume
     const link = document.createElement('a');
-    link.href = 'https://drive.google.com/file/d/10wtG7o3akcAEhSyHVkb0hJjzfztp_DBy/view?usp=sharing'; // Replace with actual resume URL
+    link.href = 'https://drive.google.com/file/d/1O7KWoLMYSsJX8YSam4x3rBWqO-OV-ESh/view?usp=sharing'; // Replace with actual resume URL
     link.download = 'Shri_Ram_Dwivedi_Resume.pdf';
     document.body.appendChild(link);
     link.click();
@@ -57,8 +57,9 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.8 }}
               className="text-lg text-muted-foreground max-w-xl"
             >
-              AI Engineering student specializing in Machine Learning, Computer Vision, and NLP. 
-              Currently building intelligent systems that bridge the gap between human needs and artificial intelligence.
+              AI Engineer specializing in LLM Integration, Agentic AI, and Medical Imaging. 
+              Building intelligent systems with FastAPI on GCP, and developing autonomous AI agents 
+              for real-world applications in healthcare and advertising.
             </motion.p>
 
             <motion.div

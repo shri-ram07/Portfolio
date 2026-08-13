@@ -2,177 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
-@layer base {
-  :root {
-    /* AI Portfolio Dark Theme with Neon Accents */
-    --background: 220 27% 8%;
-    --foreground: 210 40% 95%;
-
-    --card: 220 25% 12%;
-    --card-foreground: 210 40% 95%;
-
-    --popover: 220 25% 12%;
-    --popover-foreground: 210 40% 95%;
-
-    --primary: 195 100% 50%;
-    --primary-foreground: 220 27% 8%;
-
-    --secondary: 145 80% 42%;
-    --secondary-foreground: 220 27% 8%;
-
-    --accent: 265 85% 65%;
-    --accent-foreground: 210 40% 95%;
-
-    --muted: 220 15% 20%;
-    --muted-foreground: 210 20% 65%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 220 15% 25%;
-    --input: 220 15% 18%;
-    --ring: 195 100% 50%;
-
-    --radius: 0.75rem;
-
-    /* AI Theme Custom Colors */
-    --neon-blue: 195 100% 50%;
-    --neon-green: 145 80% 42%;
-    --neon-purple: 265 85% 65%;
-    --cyber-dark: 220 27% 8%;
-    --cyber-surface: 220 25% 12%;
-    --cyber-border: 220 15% 25%;
-    
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(195 100% 50%), hsl(265 85% 65%));
-    --gradient-secondary: linear-gradient(135deg, hsl(145 80% 42%), hsl(195 100% 50%));
-    --gradient-dark: linear-gradient(135deg, hsl(220 27% 8%), hsl(220 25% 12%));
-    
-    /* Glows */
-    --glow-primary: 0 0 20px hsl(195 100% 50% / 0.3);
-    --glow-secondary: 0 0 20px hsl(145 80% 42% / 0.3);
-    --glow-accent: 0 0 20px hsl(265 85% 65% / 0.3);
-    
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
+html {
+  scroll-behavior: auto;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground overflow-x-hidden;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
+body {
+  margin: 0;
+  background: #edeff2;
+  color: #10233f;
+  font-family: "Instrument Sans", system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
-@layer components {
-  /* Neural Network Animation */
-  @keyframes neural-pulse {
-    0%, 100% { opacity: 0.4; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
-  }
+a {
+  color: #2456c9;
+}
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
+::selection {
+  background: #2456c9;
+  color: #f6f8fa;
+}
 
-  @keyframes glow-pulse {
-    0%, 100% { 
-      box-shadow: 0 0 5px hsl(var(--neon-blue) / 0.5);
-    }
-    50% { 
-      box-shadow: 0 0 20px hsl(var(--neon-blue) / 0.8), 0 0 30px hsl(var(--neon-blue) / 0.6);
-    }
-  }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #d8482b;
+  outline-offset: 3px;
+}
 
-  @keyframes slide-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+/* hover states (design's style-hover attrs) */
+.bp-nav:hover { color: #2456c9 !important; }
+.bp-btn-ink:hover { background: #2456c9 !important; border-color: #2456c9 !important; }
+.bp-btn-blue:hover { background: #10233f !important; }
+.bp-btn-ghost:hover { border-color: #10233f !important; background: rgba(16, 35, 63, 0.05) !important; }
+.bp-btn-ghost-light:hover { border-color: #edeff2 !important; }
+.bp-btn-paper:hover { background: #7fa3e8 !important; }
+.bp-link-sky:hover { color: #edeff2 !important; }
+.bp-meta-link:hover { color: #7fa3e8 !important; }
+.bp-cta:hover { color: #7fa3e8 !important; }
 
-  @keyframes slide-in-right {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
+/* contact form fields */
+.bp-input {
+  background: rgba(237, 239, 242, 0.04);
+  border: 1px solid rgba(237, 239, 242, 0.3);
+  border-radius: 0;
+  color: #edeff2;
+  font: 400 14px "Instrument Sans", system-ui, sans-serif;
+  padding: 10px 12px;
+  width: 100%;
+  resize: vertical;
+}
 
-  .neural-pulse {
-    animation: neural-pulse 2s ease-in-out infinite;
-  }
+.bp-input:focus {
+  border-color: #7fa3e8;
+  outline: none;
+}
 
-  .float-animation {
-    animation: float 3s ease-in-out infinite;
-  }
+/* Ryze orchestration connector — flowing dashes */
+.bp-flow {
+  background: repeating-linear-gradient(180deg, #2456c9 0 4px, transparent 4px 8px);
+  animation: flowDown 0.9s linear infinite;
+}
 
-  .glow-effect {
-    animation: glow-pulse 2s ease-in-out infinite;
-  }
+@keyframes flowDown {
+  to { background-position: 0 8px; }
+}
 
-  .slide-in-up {
-    animation: slide-in-up 0.6s ease-out forwards;
-  }
+/* Chronicle activity-log caret */
+.bp-caret {
+  animation: caretBlink 1s step-end infinite;
+}
 
-  .slide-in-right {
-    animation: slide-in-right 0.6s ease-out forwards;
-  }
+@keyframes caretBlink {
+  50% { opacity: 0; }
+}
 
-  /* Neon Text Effect */
-  .neon-text {
-    text-shadow: 
-      0 0 5px hsl(var(--neon-blue)),
-      0 0 10px hsl(var(--neon-blue)),
-      0 0 15px hsl(var(--neon-blue));
-  }
+@media (prefers-reduced-motion: reduce) {
+  .bp-flow, .bp-caret { animation: none; }
+}
 
-  .neon-border {
-    border: 1px solid hsl(var(--neon-blue));
-    box-shadow: 
-      0 0 5px hsl(var(--neon-blue) / 0.5),
-      inset 0 0 5px hsl(var(--neon-blue) / 0.2);
-  }
+@keyframes cueBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(7px); }
+}
 
-  /* Gradient backgrounds */
-  .gradient-primary {
-    background: var(--gradient-primary);
-  }
+@keyframes dfScan {
+  0% { top: 0; }
+  100% { top: calc(100% - 2px); }
+}
 
-  .gradient-secondary {
-    background: var(--gradient-secondary);
-  }
+.df-scan {
+  animation: dfScan 3.2s ease-in-out infinite alternate;
+}
 
-  .gradient-dark {
-    background: var(--gradient-dark);
-  }
-
-  /* Glass morphism effect */
-  .glass-morphism {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+@media (prefers-reduced-motion: reduce) {
+  .df-scan { animation: none; }
 }

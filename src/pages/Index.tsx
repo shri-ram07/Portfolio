@@ -7,8 +7,8 @@ import profilePhoto from "@/assets/profile.png";
 
 const EMAIL = "raunakd511@gmail.com";
 const GITHUB = "https://github.com/shri-ram07";
-const LINKEDIN = "https://www.linkedin.com/in/shri-ram-dwivedi-8a91a3272";
-const RESUME_URL = "/assets/Shri-Ram-Dwivedi-Resume.pdf";
+const LINKEDIN = "https://www.linkedin.com/in/shri-ramd07/";
+const RESUME_URL = "/assets/Shri_Ram_Dwivedi_Resume.pdf";
 
 const INK = "#10233F";
 const PAPER = "#EDEFF2";
@@ -898,7 +898,7 @@ const Index = () => {
           )}
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             {isDesk && <LiveDot label="OPEN_TO_ROLES" />}
-            <a href={RESUME_URL} download="Shri-Ram-Dwivedi-Resume.pdf" data-cur className="bp-btn-ink"
+            <a href={RESUME_URL} download="Shri_Ram_Dwivedi_Resume.pdf" data-cur className="bp-btn-ink"
               style={{ textDecoration: "none", background: INK, color: PAPER, font: mono(600, "12px"), letterSpacing: ".08em", padding: "8px 14px", border: `1px solid ${INK}` }}>
               RESUME ↓
             </a>
@@ -1070,7 +1070,7 @@ const Index = () => {
               Looking for: AI/ML engineering roles where agents, vision, or LLM infrastructure meet production traffic.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <a href={RESUME_URL} download="Shri-Ram-Dwivedi-Resume.pdf" data-cur className="bp-btn-paper" style={{ textDecoration: "none", background: PAPER, color: INK, font: mono(600, "12px"), letterSpacing: ".08em", padding: "11px 18px" }}>
+              <a href={RESUME_URL} download="Shri_Ram_Dwivedi_Resume.pdf" data-cur className="bp-btn-paper" style={{ textDecoration: "none", background: PAPER, color: INK, font: mono(600, "12px"), letterSpacing: ".08em", padding: "11px 18px" }}>
                 RESUME_PDF ↓
               </a>
               <a href={`mailto:${EMAIL}`} data-cur className="bp-btn-ghost-light" style={{ textDecoration: "none", color: PAPER, font: mono(600, "12px"), letterSpacing: ".08em", padding: "11px 18px", border: "1px solid rgba(237,239,242,.4)" }}>
@@ -1153,7 +1153,7 @@ const Index = () => {
             <span style={{ color: "rgba(237,239,242,.85)", overflowWrap: "anywhere" }}>{EMAIL.toUpperCase()}</span>
             <a href={LINKEDIN} target="_blank" rel="noreferrer" data-cur className="bp-link-sky" style={{ color: SKY, textDecoration: "none", borderBottom: "1px solid rgba(127,163,232,.5)", paddingBottom: 2 }}>LINKEDIN ↗</a>
             <a href={GITHUB} target="_blank" rel="noreferrer" data-cur className="bp-link-sky" style={{ color: SKY, textDecoration: "none", borderBottom: "1px solid rgba(127,163,232,.5)", paddingBottom: 2 }}>GITHUB ↗</a>
-            <a href={RESUME_URL} download="Shri-Ram-Dwivedi-Resume.pdf" data-cur className="bp-btn-paper" style={{ color: INK, background: PAPER, textDecoration: "none", padding: "9px 16px", font: mono(600, "12px"), letterSpacing: ".08em" }}>RESUME ↓</a>
+            <a href={RESUME_URL} download="Shri_Ram_Dwivedi_Resume.pdf" data-cur className="bp-btn-paper" style={{ color: INK, background: PAPER, textDecoration: "none", padding: "9px 16px", font: mono(600, "12px"), letterSpacing: ".08em" }}>RESUME ↓</a>
             <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#4CAF6E" }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4CAF6E" }} />
               OPEN TO AI/ML ROLES — CLASS OF 2027

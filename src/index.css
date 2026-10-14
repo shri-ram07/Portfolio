@@ -2,100 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: auto;
+html,
+body {
+  background: #f6f3ee;
+  color: #16150f;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
   margin: 0;
-  background: #edeff2;
-  color: #10233f;
-  font-family: "Instrument Sans", system-ui, sans-serif;
   overflow-x: hidden;
+  font-family: "Geist", sans-serif;
+  line-height: normal;
 }
 
-a {
-  color: #2456c9;
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
 ::selection {
-  background: #2456c9;
-  color: #f6f8fa;
+  background: #16150f;
+  color: #ffd66b;
 }
 
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid #d8482b;
-  outline-offset: 3px;
+/* hover + ::after states (design's style-hover / style-after attrs) */
+.pill { transition: background 0.3s; }
+.pill:hover { background: rgba(255, 255, 255, 0.9); }
+.lift { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.lift:hover { transform: translateX(8px); }
+
+/* phones: name + nav pill don't fit on one row; the hero already shows the name */
+@media (max-width: 560px) {
+  .brand { display: none; }
+  .nav { margin: 0 auto; }
+  .nav a { padding: 9px 10px !important; }
 }
 
-/* hover states (design's style-hover attrs) */
-.bp-nav:hover { color: #2456c9 !important; }
-.bp-btn-ink:hover { background: #2456c9 !important; border-color: #2456c9 !important; }
-.bp-btn-blue:hover { background: #10233f !important; }
-.bp-btn-ghost:hover { border-color: #10233f !important; background: rgba(16, 35, 63, 0.05) !important; }
-.bp-btn-ghost-light:hover { border-color: #edeff2 !important; }
-.bp-btn-paper:hover { background: #7fa3e8 !important; }
-.bp-link-sky:hover { color: #edeff2 !important; }
-.bp-meta-link:hover { color: #7fa3e8 !important; }
-.bp-cta:hover { color: #7fa3e8 !important; }
-
-/* contact form fields */
-.bp-input {
-  background: rgba(237, 239, 242, 0.04);
-  border: 1px solid rgba(237, 239, 242, 0.3);
-  border-radius: 0;
-  color: #edeff2;
-  font: 400 14px "Instrument Sans", system-ui, sans-serif;
-  padding: 10px 12px;
-  width: 100%;
-  resize: vertical;
+/* the puzzle tab poking out of a card's right edge */
+.knob::after {
+  content: "";
+  position: absolute;
+  right: -14px;
+  top: calc(50% - 15px);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--knob);
 }
 
-.bp-input:focus {
-  border-color: #7fa3e8;
-  outline: none;
-}
-
-/* Ryze orchestration connector — flowing dashes */
-.bp-flow {
-  background: repeating-linear-gradient(180deg, #2456c9 0 4px, transparent 4px 8px);
-  animation: flowDown 0.9s linear infinite;
-}
-
-@keyframes flowDown {
-  to { background-position: 0 8px; }
-}
-
-/* Chronicle activity-log caret */
-.bp-caret {
-  animation: caretBlink 1s step-end infinite;
-}
-
-@keyframes caretBlink {
-  50% { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bp-flow, .bp-caret { animation: none; }
-}
-
-@keyframes cueBob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(7px); }
-}
-
-@keyframes dfScan {
-  0% { top: 0; }
-  100% { top: calc(100% - 2px); }
-}
-
-.df-scan {
-  animation: dfScan 3.2s ease-in-out infinite alternate;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .df-scan { animation: none; }
-}
+/* card glitter loops; the layers are added in Index.tsx */
+@keyframes glitA { to { opacity: 0.3; } }
+@keyframes glitB { to { opacity: 0.95; } }
+@keyframes sheen { 40%, 100% { transform: translateX(330%); } }

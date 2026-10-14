@@ -30,11 +30,14 @@ html.lenis body {
   color: #ffd66b;
 }
 
-/* hover + ::after states (design's style-hover / style-after attrs) */
+/* hover + ::after states (design's style-hover / style-after attrs);
+   hover only where there's a mouse, so a tap doesn't leave a card stuck mid-slide */
 .pill { transition: background 0.3s; }
-.pill:hover { background: rgba(255, 255, 255, 0.9); }
 .lift { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
-.lift:hover { transform: translateX(8px); }
+@media (hover: hover) {
+  .pill:hover { background: rgba(255, 255, 255, 0.9); }
+  .lift:hover { transform: translateX(8px); }
+}
 
 /* phones: name + nav pill don't fit on one row; the hero already shows the name */
 @media (max-width: 560px) {
@@ -55,7 +58,9 @@ html.lenis body {
   background: var(--knob);
 }
 
-/* card glitter loops; the layers are added in Index.tsx */
+/* card glitter loops; the layers are added in Index.tsx and only run in sections on stage (.live) */
+[data-sec]:not(.live) [data-glit],
+[data-sec]:not(.live) [data-glit] > div { animation-play-state: paused !important; }
 @keyframes glitA { to { opacity: 0.3; } }
 @keyframes glitB { to { opacity: 0.95; } }
 @keyframes sheen { 40%, 100% { transform: translateX(330%); } }

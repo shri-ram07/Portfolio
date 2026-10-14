@@ -80,11 +80,6 @@ const ART: Record<string, Art> = {
 
 const clamp = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const ease = (v: number) => (v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2);
-const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-const mix = (a: string, b: string, t: number) => {
-  const A = rgb(a), B = rgb(b);
-  return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t))})`;
-};
 
 /* one jigsaw edge from (x0,y0) to (x1,y1); s = which way the tab points, 0 = flat */
 function edge(x0: number, y0: number, x1: number, y1: number, s: number, T: number) {
@@ -159,8 +154,10 @@ function grainTex() {
 
 /* ------------------------------- components ------------------------------- */
 
+/* side gutter: 5vw, widening on very large screens so content tops out at 1400px */
+const GX = "max(5vw, calc((100% - 1400px) / 2))";
 const GRID = "repeat(auto-fit,minmax(min(100%,440px),1fr))";
-const SECTION: CSSProperties = { position: "relative", minHeight: "100vh", boxSizing: "border-box", padding: "14vh 5vw", display: "grid", gridTemplateColumns: GRID, gap: "64px 6vw", alignItems: "center" };
+const SECTION: CSSProperties = { position: "relative", minHeight: "100vh", boxSizing: "border-box", padding: `14vh ${GX}`, display: "grid", gridTemplateColumns: GRID, gap: "64px 6vw", alignItems: "center" };
 const COLUMN: CSSProperties = { display: "flex", flexDirection: "column", gap: 32, minWidth: 0 };
 const TAG: CSSProperties = { fontFamily: MONO, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" };
 const H2: CSSProperties = { margin: 0, fontWeight: 600, fontSize: "clamp(46px,5.4vw,100px)", lineHeight: 0.92, letterSpacing: "-0.045em", textWrap: "balance" };
@@ -178,7 +175,8 @@ const cardStyle = (t: Tone): CSSProperties => ({
 function Board({ art }: { art?: Art }) {
   return (
     <div style={{ display: "flex", justifyContent: "center", minWidth: 0 }}>
-      <div data-board style={{ position: "relative", width: "min(410px,78vw)", aspectRatio: "4/5" }}>
+      {/* 62vh keeps the whole board on screen in landscape phones */}
+      <div data-board style={{ position: "relative", width: "min(410px,78vw,62vh)", aspectRatio: "4/5" }}>
         {art ? (
           <div data-art data-grad={art.grad.join(" ")} style={{ position: "absolute", inset: 0, containerType: "size", overflow: "hidden", background: `${GLOW}, linear-gradient(150deg, ${art.grad[0]} 0%, ${art.grad[1]} 48%, ${art.grad[2]} 100%)` }}>
             <div style={{ position: "absolute", left: "8cqw", right: "8cqw", top: "8cqw", display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: "3.6cqw", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -239,7 +237,7 @@ function Split({ id, tint, tone, tag, title, art, textFirst, children }: {
 
 /* --------------------------------- page ----------------------------------- */
 
-type Piece = { el: HTMLElement; faces: HTMLElement[]; r: number; c: number; d: number; sx: number; sy: number; rz: number; rx: number; ix: number; iy: number; irz: number; idl: number };
+type Piece = { el: HTMLElement; face: HTMLElement; url: string; r: number; c: number; d: number; sx: number; sy: number; rz: number; rx: number; ix: number; iy: number; irz: number; idl: number };
 type Block = { el: HTMLElement; ov: HTMLElement; pieces: { el: HTMLElement; d: number; sx: number; sy: number; rz: number }[]; on: boolean; a: number };
 
 const Index = () => {
@@ -261,10 +259,23 @@ const Index = () => {
     const tints = secs.map((s) => s.dataset.tint!);
     const boards = secs.map((s) => s.querySelector<HTMLElement>("[data-board]")!);
     const arts = boards.map((b) => b.querySelector<HTMLElement>("[data-art]")!);
+    const [bgA, bgB] = qa("[data-bg]");
     const box = root.querySelector<HTMLElement>("[data-puzzle]")!;
     const ring = root.querySelector<HTMLElement>("[data-cursor-ring]")!;
     const dot = root.querySelector<HTMLElement>("[data-cursor-dot]")!;
-    let dead = false, raf = 0, rz = 0, idleT = 0, introAt = 0, lastBg = "", lastW = innerWidth;
+    let dead = false, raf = 0, rz = 0, idleT = 0, introAt = 0, lastW = innerWidth;
+
+    /* geometry in page coordinates, measured up front so the frame loop never reads layout */
+    let secY: number[] = [], boardAt: { x: number; y: number; w: number; h: number }[] = [], lite = false;
+    const measure = () => {
+      secY = secs.map((s) => s.getBoundingClientRect().top + scrollY);
+      boardAt = boards.map((b) => {
+        const r = b.getBoundingClientRect();
+        return { x: r.left, y: r.top + scrollY, w: r.width, h: r.height };
+      });
+      lite = innerWidth < 720 || matchMedia("(pointer: coarse)").matches; // phones: fewer, bigger pieces
+    };
+    measure();
 
     /* smooth scroll; in-page links glide to their section */
     const lenis = new Lenis({ duration: 1.1 });
@@ -372,12 +383,14 @@ const Index = () => {
       }));
     };
 
-    /* one 6×7 puzzle travels board to board, flipping from one art to the next */
-    let pieces: Piece[] = [], BW = 0, cw = 0, ch = 0, EW = 0, EH = 0, lastK = -1, lastRest: boolean | null = null, lastRestK = -1;
+    /* one jigsaw (6×7, 4×5 on phones) travels board to board, flipping from one art to the next.
+       Pieces live in page coordinates, so the compositor scrolls them; only the flight is scripted. */
+    let pieces: Piece[] = [], BW = 0, cw = 0, ch = 0, EW = 0, EH = 0;
+    let lastK = -1, lastE = -1, lastIv = -1, lastRest: boolean | null = null, lastRestK = -1;
     const buildPuzzle = () => {
       box.innerHTML = "";
-      const C = 6, R = 7, b0 = boards[0].getBoundingClientRect(), BH = b0.height;
-      BW = b0.width;
+      const [C, R] = lite ? [4, 5] : [6, 7], BH = boardAt[0].h;
+      BW = boardAt[0].w;
       cw = BW / C;
       ch = BH / R;
       const pad = Math.ceil(Math.min(cw, ch) * 0.26);
@@ -385,32 +398,54 @@ const Index = () => {
       EH = ch + 2 * pad;
       const rnd = () => Math.random() - 0.5;
       pieces = jigsaw(BW, BH, C, R, 0).map((j) => {
+        // the piece is the GPU layer; its jigsaw clip sits on a plain child so it's painted in, not masked per frame
         const el = box.appendChild(document.createElement("div"));
-        el.style.cssText = `position:absolute;left:0;top:0;width:${EW}px;height:${EH}px;transform-style:preserve-3d;will-change:transform;`;
+        el.style.cssText = `position:absolute;left:0;top:0;width:${EW}px;height:${EH}px;will-change:transform;`;
         // path relative to the piece box
         const d = j.d.replace(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g, (_, a, b) => `${(+a - j.c * cw + pad).toFixed(1)} ${(+b - j.r * ch + pad).toFixed(1)}`);
-        const faces = [0, 1].map((k) => {
-          const f = el.appendChild(document.createElement("div"));
-          f.style.cssText = `position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;clip-path:path('${d}');-webkit-clip-path:path('${d}');background-repeat:no-repeat;background-size:${BW}px ${BH}px;background-position:${(pad - j.c * cw).toFixed(1)}px ${(pad - j.r * ch).toFixed(1)}px;${k ? "transform:rotateY(180deg);" : ""}`;
-          return f;
-        });
+        const face = el.appendChild(document.createElement("div"));
+        face.style.cssText = `position:absolute;inset:0;clip-path:path('${d}');-webkit-clip-path:path('${d}');background-repeat:no-repeat;background-size:${BW}px ${BH}px;background-position:${(pad - j.c * cw).toFixed(1)}px ${(pad - j.r * ch).toFixed(1)}px;`;
         return {
-          el, faces, r: j.r, c: j.c, d: Math.random() * 0.3, sx: rnd() * 2, sy: rnd() * 2, rz: rnd() * 140, rx: rnd() * 50,
+          el, face, url: "", r: j.r, c: j.c, d: Math.random() * 0.3, sx: rnd() * 2, sy: rnd() * 2, rz: rnd() * 140, rx: rnd() * 50,
           ix: rnd() * 2, iy: rnd() * 2, irz: rnd() * 220, idl: Math.random() * 0.35,
         };
       });
-      lastK = -1;
+      lastE = -1;
       lastRest = null;
     };
+    // at rest the real boards show; the puzzle only takes over mid-flight (opacity keeps its layers warm)
     const setRest = (rest: boolean, k: number) => {
       if (rest === lastRest && k === lastRestK) return;
       lastRest = rest;
       lastRestK = k;
-      box.style.display = rest ? "none" : "";
+      box.style.opacity = rest ? "0" : "1";
       arts.forEach((a, i) => (a.style.visibility = !rest && (i === k || i === k + 1) ? "hidden" : ""));
     };
+    const placePieces = (k: number, e: number, iv: number, W: number, H: number) => {
+      const k2 = Math.min(k + 1, n - 1);
+      const A = boardAt[k], B = boardAt[k2], sA = A.w / BW, sB = B.w / BW;
+      for (const p of pieces) {
+        const ei = ease(clamp((e - p.d) / 0.7));
+        const ax = A.x + (p.c + 0.5) * cw * sA, ay = A.y + (p.r + 0.5) * ch * sA;
+        const bx = B.x + (p.c + 0.5) * cw * sB, by = B.y + (p.r + 0.5) * ch * sB;
+        const lift = Math.sin(Math.PI * ei);
+        const ii = 1 - ease(clamp((iv - p.idl) / 0.65));
+        const cx = ax + (bx - ax) * ei + p.sx * lift * W * 0.2 + p.ix * ii * W * 0.35;
+        const cy = ay + (by - ay) * ei + p.sy * lift * H * 0.22 + p.iy * ii * H * 0.45;
+        const s = sA + (sB - sA) * ei;
+        // single face: past edge-on it shows the next board, mirrored back by scaleX(-1)
+        const flip = ei > 0.5, u = urls[flip ? k2 : k];
+        if (p.url !== u) {
+          p.url = u;
+          p.face.style.backgroundImage = `url(${u})`;
+        }
+        p.el.style.transform = `translate3d(${(cx - EW / 2).toFixed(1)}px,${(cy - EH / 2).toFixed(1)}px,0) perspective(1600px) translateZ(${(lift * 160).toFixed(0)}px) rotateZ(${(p.rz * lift + p.irz * ii).toFixed(1)}deg) rotateX(${(p.rx * lift).toFixed(1)}deg) rotateY(${(180 * ei).toFixed(1)}deg)${flip ? " scaleX(-1)" : ""} scale(${(s * (1 + 0.1 * lift)).toFixed(3)})`;
+        p.el.style.opacity = ii > 0 ? (1 - ii * 0.9).toFixed(3) : "";
+      }
+    };
 
-    /* text puzzles: every [data-reveal] shatters out / assembles in, built lazily per section */
+    /* text puzzles: every [data-reveal] shatters out / assembles in. While its section is on stage the
+       overlay stays mounted (invisible when idle), so its layers are ready before a hand-over starts. */
     let blocks: Record<number, Block[]> = {};
     const resetBlocks = () => {
       blocks = {};
@@ -421,27 +456,35 @@ const Index = () => {
       el.style.opacity = h ? "0" : "";
       el.style.pointerEvents = h ? "none" : "";
     };
+    const setOn = (b: Block, on: boolean) => {
+      b.on = on;
+      hide(b.el, on);
+      b.ov.style.opacity = on ? "1" : "0";
+    };
     const blocksFor = (si: number) => {
       if (blocks[si]) return blocks[si];
       const out: Block[] = [];
       qa("[data-reveal]", secs[si]).forEach((el) => {
         const W = el.offsetWidth, H = el.offsetHeight;
         if (!W || !H) return;
-        const C = Math.max(2, Math.min(5, Math.round(W / 120))), R = Math.max(1, Math.min(3, Math.round(H / 90)));
+        const C = Math.max(2, Math.min(lite ? 3 : 4, Math.round(W / 140))), R = Math.max(1, Math.min(2, Math.round(H / 100)));
         // overlay sits beside el, not inside it, so el can fade out without taking the overlay along
         const ov = document.createElement("div");
         ov.setAttribute("data-tov", "");
         ov.inert = true;
-        ov.style.cssText = `position:absolute;left:${el.offsetLeft}px;top:${el.offsetTop}px;width:0;height:0;pointer-events:none;display:none;z-index:5;`;
+        ov.style.cssText = `position:absolute;left:${el.offsetLeft}px;top:${el.offsetTop}px;width:0;height:0;pointer-events:none;display:none;opacity:0;will-change:opacity;z-index:5;`;
         const proto = el.cloneNode(true) as HTMLElement;
         proto.removeAttribute("data-reveal");
         proto.removeAttribute("id");
         qa("[data-glit]", proto).forEach((g) => g.remove());
         Object.assign(proto.style, { position: "absolute", left: "0", top: "0", margin: "0", width: W + "px", height: H + "px", boxSizing: "border-box", transform: "none", opacity: "1" });
         const ps = jigsaw(W, H, C, R, 40).map((j) => {
+          // moving wrapper = GPU layer; the clip sits on a plain child so it's painted into that layer
           const p = ov.appendChild(document.createElement("div"));
-          p.style.cssText = `position:absolute;left:0;top:0;width:${W}px;height:${H}px;clip-path:path('${j.d}');-webkit-clip-path:path('${j.d}');transform-origin:${j.cx}px ${j.cy}px;will-change:transform,opacity;`;
-          p.appendChild(proto.cloneNode(true));
+          p.style.cssText = `position:absolute;left:0;top:0;width:${W}px;height:${H}px;transform-origin:${j.cx}px ${j.cy}px;will-change:transform,opacity;`;
+          const clip = p.appendChild(document.createElement("div"));
+          clip.style.cssText = `position:absolute;inset:0;clip-path:path('${j.d}');-webkit-clip-path:path('${j.d}');`;
+          clip.appendChild(proto.cloneNode(true));
           const ang = Math.random() * Math.PI * 2, dist = 160 + Math.random() * 360;
           return { el: p, d: Math.random() * 0.35, sx: Math.cos(ang) * dist, sy: Math.sin(ang) * dist * 0.8 + 60, rz: (Math.random() - 0.5) * 160 };
         });
@@ -458,18 +501,16 @@ const Index = () => {
         if (i === 0) a = Math.max(a, 1 - iv);
         for (const b of blocksFor(i)) {
           if (!active) {
-            if (b.a !== -1) { b.on = false; b.ov.style.display = "none"; hide(b.el, true); b.a = -1; }
+            // off stage: unmount the overlay, keep the text hidden until its turn
+            if (b.a !== -1) { b.ov.style.display = "none"; setOn(b, true); b.a = -1; }
             continue;
           }
+          if (b.a < 0) b.ov.style.display = "";
           if (Math.abs(a - b.a) < 0.0015) continue;
           b.a = a;
-          if (a <= 0.002) {
-            if (b.on) b.ov.style.display = "none";
-            b.on = false;
-            hide(b.el, false);
-            continue;
-          }
-          if (!b.on) { b.on = true; hide(b.el, true); b.ov.style.display = ""; }
+          const on = a > 0.002;
+          if (on !== b.on) setOn(b, on);
+          if (!on) continue;
           for (const p of b.pieces) {
             const ai = ease(clamp((a - p.d) / 0.65));
             p.el.style.transform = `translate3d(${(p.sx * ai).toFixed(1)}px,${(p.sy * ai).toFixed(1)}px,0) rotate(${(p.rz * ai).toFixed(1)}deg) scale(${(1 - 0.18 * ai).toFixed(3)})`;
@@ -479,10 +520,12 @@ const Index = () => {
       }
     };
 
+    let bgK = -1, lastO = "";
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
       lenis.raf(t);
-      const W = innerWidth, H = innerHeight;
+      // read everything up front: innerWidth/innerHeight/scrollY after a style write force a sync style + layout pass
+      const W = innerWidth, H = innerHeight, y = scrollY;
       if (cursor) {
         m.rx += (m.cx - m.rx) * 0.2;
         m.ry += (m.cy - m.ry) * 0.2;
@@ -490,46 +533,30 @@ const Index = () => {
         ring.style.transform = `translate3d(${m.rx.toFixed(1)}px,${m.ry.toFixed(1)}px,0) scale(${m.s.toFixed(3)})`;
         dot.style.transform = `translate3d(${m.cx}px,${m.cy}px,0)`;
       }
-      // k = section we're in, e = 0→1 hand-over to section k+1
-      const tops = secs.map((s) => s.getBoundingClientRect().top);
-      const eOf = (k: number) => clamp((H * 0.92 - tops[k + 1]) / (H * 0.62));
+      // k = section we're in, e = 0→1 hand-over to section k+1 (maths on cached positions, no layout reads)
+      const eOf = (k: number) => clamp((H * 0.92 - secY[k + 1] + y) / (H * 0.62));
       let k = 0;
       while (k < n - 1 && eOf(k) >= 1) k++;
       const e = k < n - 1 ? eOf(k) : 0;
       const iv = introAt ? 1 - Math.pow(1 - clamp((t - introAt) / 2200), 3) : 0; // intro, power3.out
-      const bg = mix(tints[k], tints[Math.min(k + 1, n - 1)], ease(e));
-      if (bg !== lastBg) {
-        lastBg = bg;
-        document.body.style.background = document.documentElement.style.background = bg;
+      // background: two composited colour layers crossfade, so nothing repaints
+      if (k !== bgK) {
+        bgK = k;
+        bgA.style.background = tints[k];
+        bgB.style.background = tints[Math.min(k + 1, n - 1)];
+        secs.forEach((s, i) => s.classList.toggle("live", i === k || i === k + 1)); // glitter only animates here
       }
+      const o = ease(e).toFixed(3);
+      if (o !== lastO) bgB.style.opacity = lastO = o;
       driveText(k, e, iv);
       if (!pieces.length) return;
-
       const rest = e <= 0.0005 && iv >= 0.999;
       setRest(rest, k);
-      if (rest) return;
-      if (k !== lastK) {
-        lastK = k;
-        const uA = urls[k], uB = urls[Math.min(k + 1, n - 1)];
-        for (const p of pieces) {
-          p.faces[k % 2].style.backgroundImage = `url(${uA})`;
-          p.faces[(k + 1) % 2].style.backgroundImage = `url(${uB})`;
-        }
-      }
-      const A = boards[k].getBoundingClientRect(), B = boards[Math.min(k + 1, n - 1)].getBoundingClientRect();
-      const sA = A.width / BW, sB = B.width / BW;
-      for (const p of pieces) {
-        const ei = ease(clamp((e - p.d) / 0.7));
-        const ax = A.left + (p.c + 0.5) * cw * sA, ay = A.top + (p.r + 0.5) * ch * sA;
-        const bx = B.left + (p.c + 0.5) * cw * sB, by = B.top + (p.r + 0.5) * ch * sB;
-        const lift = Math.sin(Math.PI * ei);
-        const ii = 1 - ease(clamp((iv - p.idl) / 0.65));
-        const cx = ax + (bx - ax) * ei + p.sx * lift * W * 0.2 + p.ix * ii * W * 0.35;
-        const cy = ay + (by - ay) * ei + p.sy * lift * H * 0.22 + p.iy * ii * H * 0.45;
-        const s = sA + (sB - sA) * ei;
-        p.el.style.transform = `translate3d(${(cx - EW / 2).toFixed(1)}px,${(cy - EH / 2).toFixed(1)}px,${(lift * 160).toFixed(0)}px) rotateZ(${(p.rz * lift + p.irz * ii).toFixed(1)}deg) rotateX(${(p.rx * lift).toFixed(1)}deg) rotateY(${(180 * (k + ei)).toFixed(1)}deg) scale(${(s * (1 + 0.1 * lift)).toFixed(3)})`;
-        p.el.style.opacity = ii > 0 ? (1 - ii * 0.9).toFixed(3) : "";
-      }
+      if (rest || (e === lastE && k === lastK && iv === lastIv)) return;
+      lastE = e;
+      lastK = k;
+      lastIv = iv;
+      placePieces(k, e, iv, W, H);
     };
     raf = requestAnimationFrame(loop);
 
@@ -539,6 +566,7 @@ const Index = () => {
       try {
         await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
         if (dead) return;
+        measure(); // the web fonts may have shifted things
         resetBlocks(); // the hero text was measured before the web fonts landed
         await renderArts();
         if (dead) return;
@@ -562,6 +590,8 @@ const Index = () => {
     const onResize = () => {
       clearTimeout(rz);
       rz = window.setTimeout(async () => {
+        measure();
+        lastE = -1; // re-place the puzzle on the next frame
         if (innerWidth === lastW) {
           // height-only (mobile URL bar, devtools): sizes hold, sections may have shifted
           Object.values(blocks).flat().forEach((b) => {
@@ -595,12 +625,16 @@ const Index = () => {
   }, []);
 
   return (
-    <div ref={rootRef} style={{ overflowX: "clip" }}>
-      <div data-puzzle style={{ position: "fixed", inset: 0, zIndex: 20, pointerEvents: "none", perspective: 1600, overflow: "hidden" }} />
+    // clip: flying pieces never widen or lengthen the page
+    <div ref={rootRef} style={{ position: "relative", overflow: "clip" }}>
+      {/* section tint: two colour layers crossfaded by opacity */}
+      <div data-bg aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", willChange: "opacity" }} />
+      <div data-bg aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", willChange: "opacity", opacity: 0 }} />
+      <div data-puzzle aria-hidden style={{ position: "absolute", left: 0, top: 0, zIndex: 20, pointerEvents: "none", opacity: 0, willChange: "opacity" }} />
       <div data-cursor-ring style={{ display: "none", position: "fixed", left: 0, top: 0, width: 34, height: 34, margin: "-17px 0 0 -17px", border: `1.5px solid ${INK}`, borderRadius: "50%", zIndex: 300, pointerEvents: "none" }} />
       <div data-cursor-dot style={{ display: "none", position: "fixed", left: 0, top: 0, width: 6, height: 6, margin: "-3px 0 0 -3px", background: INK, borderRadius: "50%", zIndex: 301, pointerEvents: "none" }} />
 
-      <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24, padding: "22px 5vw", pointerEvents: "none" }}>
+      <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24, padding: `22px ${GX}`, pointerEvents: "none" }}>
         <a href="#top" className="brand" style={{ pointerEvents: "auto", fontWeight: 600, fontSize: 19, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>Shri Ram Dwivedi</a>
         <nav className="nav" style={{
           pointerEvents: "auto", display: "flex", gap: 2, alignItems: "center", height: 46, padding: "0 5px", borderRadius: 999,
@@ -615,7 +649,7 @@ const Index = () => {
       </header>
 
       <main id="top" style={{ position: "relative", zIndex: 2 }}>
-        <section data-sec data-tint="#f6f3ee" style={{ ...SECTION, padding: "130px 5vw 10vh" }}>
+        <section data-sec data-tint="#f6f3ee" style={{ ...SECTION, padding: `130px ${GX} 10vh` }}>
           <div style={{ ...COLUMN, gap: 30 }}>
             <h1 data-reveal style={{ margin: 0, fontWeight: 600, fontSize: "clamp(68px,9vw,172px)", lineHeight: 0.86, letterSpacing: "-0.05em" }}>Shri Ram<br />Dwivedi</h1>
             <p data-reveal style={{ margin: 0, maxWidth: 440, fontSize: "clamp(18px,1.4vw,21px)", lineHeight: 1.45, letterSpacing: "-0.012em", color: "#34322b", textWrap: "pretty" }}>
@@ -662,7 +696,7 @@ const Index = () => {
           </p>
         </Split>
 
-        <section id="contact" data-sec data-tint="#f6f3ee" style={{ position: "relative", minHeight: "100vh", boxSizing: "border-box", padding: "14vh 5vw 36px", display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "8vh" }}>
+        <section id="contact" data-sec data-tint="#f6f3ee" style={{ position: "relative", minHeight: "100vh", boxSizing: "border-box", padding: `14vh ${GX} 36px`, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "8vh" }}>
           <div style={{ display: "grid", gridTemplateColumns: GRID, gap: "64px 6vw", alignItems: "center", flex: 1 }}>
             <Board />
             <div style={{ ...COLUMN, gap: 30 }}>

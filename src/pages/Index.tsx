@@ -38,16 +38,24 @@ const VISION: Entry[] = [
     name: "Realfy Oasis", meta: "AI Intern · 2025",
     body: "Real-time multi-person action recognition at 92%, face verification at 98% across 500+ daily checks, and an autoencoder that cut false alarms by 40%.",
   },
+];
+
+/* the two leads get full-width cards; the rest sit in a compact grid */
+const FEATURED: Entry[] = [
   {
-    name: "NeuroInsight AI", meta: "Research build",
+    name: "LeastWise", meta: "GitHub ↗", href: `${GITHUB}/LeastWise`,
+    body: "A Gemini agent that trims cloud IAM to the minimum: 227 permissions down to 48 with zero dangerous removals. Tech Zephyr 4.0, IIT Bhubaneswar.",
+  },
+  {
+    name: "NeuroInsight AI", meta: "GitHub ↗", href: `${GITHUB}/NeuroInsight`,
     body: "A 3D U-Net that outlines brain tumours in MRI scans, evaluated on BraTS, with heat-maps showing where the model looked and where it is unsure.",
   },
 ];
 
 const PROJECTS: Entry[] = [
   {
-    name: "LeastWise", meta: "GitHub ↗", href: `${GITHUB}/LeastWise`,
-    body: "A Gemini agent that trims cloud IAM to the minimum: 227 permissions down to 48 with zero dangerous removals. Tech Zephyr 4.0, IIT Bhubaneswar.",
+    name: "Chronicle", meta: "GitHub ↗", href: `${GITHUB}/Chronicle`,
+    body: "A research agent that turns one goal into a cited, multi-format report: 8 self-correcting phases, 75+ targeted web searches.",
   },
   {
     name: "DeepFake Detector", meta: "GitHub ↗", href: `${GITHUB}/DeepFakeDetection`,
@@ -57,13 +65,29 @@ const PROJECTS: Entry[] = [
     name: "Fake News Detection", meta: "GitHub ↗", href: `${GITHUB}/FakeNewsDetection`,
     body: "A TF-IDF classifier at 96% accuracy on 20,000+ articles, checking any story in real time.",
   },
+  {
+    name: "SymptomIQ", meta: "GitHub ↗", href: `${GITHUB}/SymptomIQ`,
+    body: "Type in symptoms, get the likely condition at 90%+ accuracy and doctors nearby to see.",
+  },
+  {
+    name: "Power Monitoring", meta: "1st of 50+ teams",
+    body: "Computer vision that spots an empty room and switches its appliances off. Won the institutional startup competition.",
+  },
+  {
+    name: "Student Management", meta: "GitHub ↗", href: `${GITHUB}/Student-Management-System`,
+    body: "A Tkinter desktop app for student records, backed by MySQL.",
+  },
 ];
 
+/* every skill from the résumé and the previous site; the last group runs full width */
 const STACK = [
-  ["Agentic AI & LLMs", "Gemini API, MCP, agentic workflows, orchestration, prompt engineering, RAG, n8n"],
-  ["Deep learning", "PyTorch, TensorFlow, Transformers, OpenCV, MediaPipe, ONNX Runtime"],
-  ["Backend & web", "FastAPI, Node.js, Flask, REST, OAuth2, PostgreSQL, React, TypeScript"],
-  ["Cloud & DevOps", "Google Cloud Run, Compute Engine, Docker, CI/CD, autoscaling"],
+  ["Agentic AI & LLMs", "Gemini API, MCP, agentic workflows, LLM orchestration, agent memory, prompt engineering, RAG, n8n"],
+  ["Deep learning", "PyTorch, TensorFlow, Keras, Scikit-Learn, Transformers, CNN / LSTM, 3D U-Net, ONNX Runtime"],
+  ["Computer vision", "OpenCV, MediaPipe, YOLOv8, ST-GNN, pose estimation, face verification, deepfake detection"],
+  ["NLP & data", "NLTK, TF-IDF, text classification, data analysis, Jupyter"],
+  ["Backend & web", "FastAPI, Node.js, Express, Flask, REST APIs, microservices, OAuth2, PostgreSQL, MySQL, React, HTML/CSS"],
+  ["Cloud & DevOps", "Google Cloud Run, Compute Engine, Docker, CI/CD, autoscaling, Git/GitHub"],
+  ["Languages", "Python, TypeScript, JavaScript, SQL, C/C++, Java"],
 ];
 
 /* the 4:5 stat boards — the travelling puzzle is cut from these */
@@ -198,28 +222,30 @@ function Board({ art }: { art?: Art }) {
   );
 }
 
-/* role / project card; links get a tighter fit and slide on hover */
-function Card({ tone, name, meta, body, href }: Entry & { tone: Tone }) {
-  const style = { ...cardStyle(tone), gap: href ? 10 : 12, padding: href ? "22px 28px" : "26px 28px", "--knob": tone.knob } as CSSProperties;
+/* role / project card; links get a tighter fit and slide on hover; compact = grid-sized, no puzzle tab */
+function Card({ tone, name, meta, body, href, compact }: Entry & { tone: Tone; compact?: boolean }) {
+  const style = { ...cardStyle(tone), gap: href ? 10 : 12, padding: compact ? "20px 22px" : href ? "22px 28px" : "26px 28px", "--knob": tone.knob } as CSSProperties;
+  const cls = [!compact && "knob", href && "lift"].filter(Boolean).join(" ");
   const inner = (
     <>
-      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: href ? undefined : "wrap" }}>
-        <span style={{ fontWeight: 600, fontSize: 26, letterSpacing: "-0.035em" }}>{name}</span>
+      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "4px 12px", flexDirection: compact ? "column" : undefined, flexWrap: href ? undefined : "wrap" }}>
+        <span style={{ fontWeight: 600, fontSize: compact ? 21 : 26, letterSpacing: compact ? "-0.03em" : "-0.035em" }}>{name}</span>
         <span style={{ fontSize: 14, color: tone.meta }}>{meta}</span>
       </div>
-      <p style={{ position: "relative", margin: 0, fontSize: 16, lineHeight: 1.55, color: tone.text, textWrap: "pretty" }}>{body}</p>
+      <p style={{ position: "relative", margin: 0, fontSize: compact ? 15 : 16, lineHeight: compact ? 1.5 : 1.55, color: tone.text, textWrap: "pretty" }}>{body}</p>
     </>
   );
   return href ? (
-    <a data-reveal data-card href={href} target="_blank" rel="noreferrer" className="knob lift" style={style}>{inner}</a>
+    <a data-reveal data-card href={href} target="_blank" rel="noreferrer" className={cls} style={style}>{inner}</a>
   ) : (
-    <article data-reveal data-card className="knob" style={style}>{inner}</article>
+    <article data-reveal data-card className={cls} style={style}>{inner}</article>
   );
 }
 
 /* board on one side, label + heading + content on the other */
-function Split({ id, tint, tone, tag, title, art, textFirst, children }: {
-  id?: string; tint: string; tone: Tone; tag: string; title: string; art: Art; textFirst?: boolean; children: ReactNode;
+/* top: for sections taller than the screen, so the board (where the puzzle lands) stays near the top */
+function Split({ id, tint, tone, tag, title, art, textFirst, top, children }: {
+  id?: string; tint: string; tone: Tone; tag: string; title: string; art: Art; textFirst?: boolean; top?: boolean; children: ReactNode;
 }) {
   const text = (
     <div style={COLUMN}>
@@ -229,7 +255,7 @@ function Split({ id, tint, tone, tag, title, art, textFirst, children }: {
     </div>
   );
   return (
-    <section id={id} data-sec data-tint={tint} style={SECTION}>
+    <section id={id} data-sec data-tint={tint} style={top ? { ...SECTION, alignItems: "start" } : SECTION}>
       {textFirst ? <>{text}<Board art={art} /></> : <><Board art={art} />{text}</>}
     </section>
   );
@@ -238,7 +264,7 @@ function Split({ id, tint, tone, tag, title, art, textFirst, children }: {
 /* --------------------------------- page ----------------------------------- */
 
 type Piece = { el: HTMLElement; face: HTMLElement; url: string; r: number; c: number; d: number; sx: number; sy: number; rz: number; rx: number; ix: number; iy: number; irz: number; idl: number };
-type Block = { el: HTMLElement; ov: HTMLElement; pieces: { el: HTMLElement; d: number; sx: number; sy: number; rz: number }[]; on: boolean; a: number };
+type Block = { el: HTMLElement; ov: HTMLElement; pieces: { el: HTMLElement; d: number; sx: number; sy: number; rz: number }[]; on: boolean; a: number; y: number; h: number };
 
 const Index = () => {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -489,11 +515,11 @@ const Index = () => {
           return { el: p, d: Math.random() * 0.35, sx: Math.cos(ang) * dist, sy: Math.sin(ang) * dist * 0.8 + 60, rz: (Math.random() - 0.5) * 160 };
         });
         (el.offsetParent as HTMLElement).appendChild(ov);
-        out.push({ el, ov, pieces: ps, on: false, a: -1 });
+        out.push({ el, ov, pieces: ps, on: false, a: -1, y: secY[si] + el.offsetTop, h: H });
       });
       return (blocks[si] = out);
     };
-    const driveText = (k: number, e: number, iv: number) => {
+    const driveText = (k: number, e: number, iv: number, y: number, H: number) => {
       for (let i = 0; i < n; i++) {
         const active = i === k || i === k + 1;
         if (!active && !blocks[i]) continue;
@@ -506,6 +532,8 @@ const Index = () => {
             continue;
           }
           if (b.a < 0) b.ov.style.display = "";
+          // far off screen (tall phone sections): skip; it catches up before it scrolls into view
+          if (b.y + b.h < y - H * 0.5 || b.y > y + H * 1.5) continue;
           if (Math.abs(a - b.a) < 0.0015) continue;
           b.a = a;
           const on = a > 0.002;
@@ -548,7 +576,7 @@ const Index = () => {
       }
       const o = ease(e).toFixed(3);
       if (o !== lastO) bgB.style.opacity = lastO = o;
-      driveText(k, e, iv);
+      driveText(k, e, iv, y, H);
       if (!pieces.length) return;
       const rest = e <= 0.0005 && iv >= 0.999;
       setRest(rest, k);
@@ -594,10 +622,11 @@ const Index = () => {
         lastE = -1; // re-place the puzzle on the next frame
         if (innerWidth === lastW) {
           // height-only (mobile URL bar, devtools): sizes hold, sections may have shifted
-          Object.values(blocks).flat().forEach((b) => {
+          for (const [si, bs] of Object.entries(blocks)) for (const b of bs) {
             b.ov.style.left = b.el.offsetLeft + "px";
             b.ov.style.top = b.el.offsetTop + "px";
-          });
+            b.y = secY[+si] + b.el.offsetTop;
+          }
           return;
         }
         lastW = innerWidth;
@@ -670,22 +699,25 @@ const Index = () => {
           </div>
         </Split>
 
-        <Split tint="#eaf3fd" tone={BLUE} tag="02 · Perception" title="Machines that see, even inside the body." art={ART.realfy} textFirst>
+        <Split tint="#eaf3fd" tone={BLUE} tag="02 · Perception" title="Machines that see, in real time." art={ART.realfy} textFirst>
           <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingRight: 16 }}>
             {VISION.map((w) => <Card key={w.name} tone={BLUE} {...w} />)}
           </div>
         </Split>
 
-        <Split id="projects" tint="#fbf4e1" tone={AMBER} tag="03 · Projects" title="Built, tested, shipped." art={ART.leastwise}>
+        <Split id="projects" tint="#fbf4e1" tone={AMBER} tag="03 · Projects" title="Built, tested, shipped." art={ART.leastwise} top>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingRight: 16 }}>
-            {PROJECTS.map((w) => <Card key={w.name} tone={AMBER} {...w} />)}
+            {FEATURED.map((w) => <Card key={w.name} tone={AMBER} {...w} />)}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,230px),1fr))", gap: 16 }}>
+              {PROJECTS.map((w) => <Card key={w.name} tone={AMBER} compact {...w} />)}
+            </div>
           </div>
         </Split>
 
-        <Split id="toolkit" tint="#edf6e4" tone={GREEN} tag="04 · Toolkit" title="The stack behind it." art={ART.kalinga} textFirst>
+        <Split id="toolkit" tint="#edf6e4" tone={GREEN} tag="04 · Toolkit" title="The stack behind it." art={ART.kalinga} textFirst top>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,220px),1fr))", gap: 16, paddingRight: 16 }}>
-            {STACK.map(([k, v]) => (
-              <div key={k} data-reveal data-card style={{ ...cardStyle(GREEN), gap: 10, padding: "22px 24px" }}>
+            {STACK.map(([k, v], i) => (
+              <div key={k} data-reveal data-card style={{ ...cardStyle(GREEN), gap: 10, padding: "22px 24px", gridColumn: i === STACK.length - 1 ? "1 / -1" : undefined }}>
                 <span style={{ position: "relative", fontWeight: 600, fontSize: 21, letterSpacing: "-0.03em" }}>{k}</span>
                 <span style={{ position: "relative", fontSize: 15, lineHeight: 1.5, color: GREEN.text }}>{v}</span>
               </div>

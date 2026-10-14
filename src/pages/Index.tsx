@@ -20,15 +20,18 @@ const BLUE: Tone = { tag: "#46566b", card: "#edf6ff 0%, #d2e7ff 55%, #b6d7ff 100
 const AMBER: Tone = { tag: "#655a3c", card: "#fff7de 0%, #ffe8ae 55%, #ffd585 100%", shadow: "120,80,20", knob: "#ffe09c", text: "#3a3222" };
 const GREEN: Tone = { tag: "#4c5e3f", card: "#f0fae3 0%, #d8f0bd 55%, #bfe6a0 100%", shadow: "40,90,20", text: "#2c3825" };
 
-type Entry = { name: string; meta: string; body: string; href?: string };
+type Entry = { name: string; meta: string; body: string; href?: string; live?: string };
+
+const RYZE_LIVE = "https://www.get-ryze.ai/";
+const SCALIX_LIVE = "https://ads.scalixai.com";
 
 const WORK: Entry[] = [
   {
-    name: "Ryze AI", meta: "Founding AI Engineer · 2025 to 2026",
+    name: "Ryze AI", meta: "Founding AI Engineer · 2025 to 2026", live: RYZE_LIVE,
     body: "Built the production agent that reads live ad data, then optimises campaigns and budgets with no human in the loop. MCP servers, prompt framework, long-term memory, and a FastAPI backend serving 1,000+ concurrent users.",
   },
   {
-    name: "ScalixAI", meta: "AI Engineer, freelance · 2026",
+    name: "ScalixAI", meta: "AI Engineer, freelance · 2026", live: SCALIX_LIVE,
     body: "Shipped a 150+ tool MCP server that lets Claude and ChatGPT run Google Ads in plain English. Every change goes plan, then confirm, with built-in policy checks.",
   },
 ];
@@ -223,7 +226,7 @@ function Board({ art }: { art?: Art }) {
 }
 
 /* role / project card; links get a tighter fit and slide on hover; compact = grid-sized, no puzzle tab */
-function Card({ tone, name, meta, body, href, compact }: Entry & { tone: Tone; compact?: boolean }) {
+function Card({ tone, name, meta, body, href, live, compact }: Entry & { tone: Tone; compact?: boolean }) {
   const style = { ...cardStyle(tone), gap: href ? 10 : 12, padding: compact ? "20px 22px" : href ? "22px 28px" : "26px 28px", "--knob": tone.knob } as CSSProperties;
   const cls = [!compact && "knob", href && "lift"].filter(Boolean).join(" ");
   const inner = (
@@ -233,6 +236,11 @@ function Card({ tone, name, meta, body, href, compact }: Entry & { tone: Tone; c
         <span style={{ fontSize: 14, color: tone.meta }}>{meta}</span>
       </div>
       <p style={{ position: "relative", margin: 0, fontSize: compact ? 15 : 16, lineHeight: compact ? 1.5 : 1.55, color: tone.text, textWrap: "pretty" }}>{body}</p>
+      {live && (
+        <a href={live} target="_blank" rel="noreferrer" style={{ position: "relative", alignSelf: "flex-start", fontSize: 14, fontWeight: 500, borderBottom: `1px solid ${INK}` }}>
+          See it live ↗
+        </a>
+      )}
     </>
   );
   return href ? (
@@ -735,12 +743,17 @@ const Index = () => {
               <div data-reveal style={{ ...TAG, color: "#5d5a52" }}>05 · Contact</div>
               <h2 data-reveal style={H2}>The last piece is you.</h2>
               <p data-reveal style={{ margin: 0, maxWidth: 440, fontSize: 18, lineHeight: 1.5, color: "#34322b", textWrap: "pretty" }}>
-                Hiring for an AI engineering role? I would love to hear what you are building.
+                Have an opportunity, or an idea you want to build together? I would love to hear about it.
               </p>
               <div data-reveal style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                 <a href={`mailto:${EMAIL}`} style={{ ...BTN_SOLID, gap: 10, padding: "0 24px" }}>{EMAIL}</a>
                 <a href={LINKEDIN} target="_blank" rel="noreferrer" style={{ ...BTN_LINE, padding: "0 22px" }}>LinkedIn ↗</a>
                 <a href={GITHUB} target="_blank" rel="noreferrer" style={{ ...BTN_LINE, padding: "0 22px" }}>GitHub ↗</a>
+              </div>
+              <div data-reveal style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
+                <span style={{ ...TAG, color: "#5d5a52", flexBasis: "100%" }}>See my work live</span>
+                <a href={RYZE_LIVE} target="_blank" rel="noreferrer" style={{ ...BTN_LINE, height: 44, padding: "0 18px", fontSize: 15 }}>Ryze AI ↗</a>
+                <a href={SCALIX_LIVE} target="_blank" rel="noreferrer" style={{ ...BTN_LINE, height: 44, padding: "0 18px", fontSize: 15 }}>ScalixAI Ads ↗</a>
               </div>
             </div>
           </div>

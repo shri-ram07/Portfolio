@@ -1,6 +1,6 @@
 import { CSSProperties, ReactNode, useLayoutEffect, useRef } from "react";
 import Lenis from "lenis";
-import profilePhoto from "@/assets/profile.png";
+import profilePhoto from "@/assets/portrait.webp";
 
 /* ---------------------------------- data ---------------------------------- */
 
@@ -213,7 +213,7 @@ function Board({ art }: { art?: Art }) {
             </div>
           </div>
         ) : (
-          <div data-art style={{ position: "absolute", inset: 0, overflow: "hidden", background: "#cfe3b0" }}>
+          <div data-art style={{ position: "absolute", inset: 0, overflow: "hidden", background: "#d9d3ca" }}>
             <img src={profilePhoto} alt="Shri Ram Dwivedi" style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 32%" }} />
           </div>
         )}
@@ -368,7 +368,7 @@ const Index = () => {
         if (img) {
           await img.decode().catch(() => {});
           const iw = img.naturalWidth, ih = img.naturalHeight, sc = Math.max(W / (iw || 1), H / (ih || 1));
-          x.fillStyle = "#cfe3b0";
+          x.fillStyle = "#d9d3ca";
           x.fillRect(0, 0, W, H);
           if (iw) x.drawImage(img, (W - iw * sc) * 0.5, (H - ih * sc) * 0.32, iw * sc, ih * sc);
         } else {

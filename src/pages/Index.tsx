@@ -1,6 +1,7 @@
 import { CSSProperties, ReactNode, useLayoutEffect, useRef } from "react";
 import Lenis from "lenis";
 import profilePhoto from "@/assets/portrait.webp";
+import archImg from "@/assets/ramv1-arch.webp";
 
 /* ---------------------------------- data ---------------------------------- */
 
@@ -8,6 +9,8 @@ const EMAIL = "raunakd511@gmail.com";
 const GITHUB = "https://github.com/shri-ram07";
 const LINKEDIN = "https://www.linkedin.com/in/shri-ramd07/";
 const RESUME_URL = "/assets/Shri_Ram_Dwivedi_AI_Engineer.pdf";
+// static page in public/ramv1; the explicit index.html also resolves under `npm run dev`
+const SHOWCASE = "/ramv1/index.html";
 
 const INK = "#16150f";
 const MONO = "'Geist Mono', monospace";
@@ -19,6 +22,9 @@ const VIOLET: Tone = { tag: "#57536b", card: "#f1edff 0%, #ddd3ff 55%, #c9bbff 1
 const BLUE: Tone = { tag: "#46566b", card: "#edf6ff 0%, #d2e7ff 55%, #b6d7ff 100%", shadow: "20,60,120", knob: "#c6e0ff", meta: "#3e4d61", text: "#25303d" };
 const AMBER: Tone = { tag: "#655a3c", card: "#fff7de 0%, #ffe8ae 55%, #ffd585 100%", shadow: "120,80,20", knob: "#ffe09c", text: "#3a3222" };
 const GREEN: Tone = { tag: "#4c5e3f", card: "#f0fae3 0%, #d8f0bd 55%, #bfe6a0 100%", shadow: "40,90,20", text: "#2c3825" };
+const PEACH: Tone = { tag: "#6b5040", card: "#fff3ea 0%, #ffe2cf 55%, #ffcdb0 100%", shadow: "140,80,40", knob: "#ffd2bb", meta: "#6a4c3e", text: "#3d2c22" };
+
+const RAMV1_SPECS = ["826,465 parameters", "4 blocks × 4 heads", "64-character context", "Trained in 9.4 min on a CPU"];
 
 type Entry = { name: string; meta: string; body: string; href?: string; live?: string };
 
@@ -721,6 +727,48 @@ const Index = () => {
             </div>
           </div>
         </Split>
+
+        {/* RamV1 milestone: its showcase lives in public/ramv1; the board is the architecture diagram */}
+        <section id="ramv1" data-sec data-tint="#f9efe7" style={{ ...SECTION, alignItems: "start" }}>
+          <div style={COLUMN}>
+            <div data-reveal style={{ ...TAG, color: PEACH.tag }}>Milestone · GenAI journey</div>
+            <h2 data-reveal style={H2}>A transformer, written by hand.</h2>
+            <p data-reveal style={{ margin: 0, maxWidth: 520, fontSize: 18, lineHeight: 1.5, color: "#34322b", textWrap: "pretty" }}>
+              A milestone in my GenAI journey: RamV1, a character-level GPT I built from scratch in PyTorch.
+            </p>
+            <div style={{ paddingRight: 16 }}>
+              <Card
+                tone={PEACH} name="Why it matters to me" meta=""
+                body="I build agents on top of large language models every day. RamV1 is me opening the box: attention, masking, the training loop and the sampler, each written line by line with no pretrained weights. Now every number in that diagram is one I understand, and the six bugs it took to get there taught me more about PyTorch than reading ever did."
+              />
+            </div>
+            <div data-reveal style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {RAMV1_SPECS.map((s) => (
+                <span key={s} style={{ fontFamily: MONO, fontSize: 12, padding: "7px 12px", borderRadius: 999, border: "1px solid rgba(22,21,15,0.18)", color: PEACH.text }}>{s}</span>
+              ))}
+            </div>
+            <div data-reveal style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              <a href={SHOWCASE} style={BTN_SOLID}>Explore the architecture →</a>
+              <a href={`${SHOWCASE}#tour`} style={BTN_LINE}>▶ Play the guided tour</a>
+            </div>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", minWidth: 0 }}>
+            <div data-board style={{ position: "relative", width: "min(410px,78vw,62vh)", aspectRatio: "4/5" }}>
+              <div data-art style={{ position: "absolute", inset: 0, overflow: "hidden", background: "#0a0b0e" }}>
+                <img
+                  src={archImg}
+                  alt="RamV1 architecture: character ids pass through token and position embeddings, four blocks of masked multi-head attention and feed-forward layers, then a final Linear layer that scores the next character."
+                  style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+                />
+                <a href={SHOWCASE} aria-label="Explore the RamV1 architecture" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "7%" }}>
+                  <span style={{ padding: "10px 18px", borderRadius: 999, border: "1px solid rgba(236,232,223,0.3)", background: "rgba(10,11,14,0.75)", color: "#ece8df", fontSize: 14, fontWeight: 500 }}>
+                    Click to explore →
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <Split id="toolkit" tint="#edf6e4" tone={GREEN} tag="04 · Toolkit" title="The stack behind it." art={ART.kalinga} textFirst top>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,220px),1fr))", gap: 16, paddingRight: 16 }}>

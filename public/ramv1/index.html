@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RamV1</title>
+<meta name="description" content="RamV1 is a character-level GPT built from scratch in PyTorch. Scroll to fly into its architecture, block by block, down to the code that runs each part.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RamV1: a character-level GPT built from scratch in PyTorch">
+<meta property="og:description" content="826,465 parameters, attention written by hand. Fly through the architecture, block by block, down to the real code.">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0b0e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='7' fill='%230a0b0e' stroke='%23f5b17f' stroke-width='2.5'/%3E%3Cpath d='M10 22V10h6a4 4 0 0 1 0 8h-6m6 0 5 4' fill='none' stroke='%23ece8df' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip" href="#results">Skip to the results</a>
+
+<div class="journey" id="top">
+  <div class="stage">
+    <svg id="arch" viewBox="0 0 1000 1520" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="arch-t arch-d">
+      <title id="arch-t">RamV1 architecture</title>
+      <desc id="arch-d">A decoder-only, character-level transformer. The corpus becomes ids, getBatch cuts 32 windows of 64 characters, token and learned position embeddings are added, four pre-norm blocks apply masked multi-head attention and a feed-forward network with residual connections, then a final LayerNorm and a Linear layer give 97 logits. Training compares logits with the targets using cross-entropy and updates the weights with AdamW. Generation applies softmax, samples a character, appends it and crops the context to 64.</desc>
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <path class="arw" d="M0 0.8 L9.5 5 L0 9.2 Z"/>
+        </marker>
+      </defs>
+
+      <!-- ===== generation loop (left rail) ===== -->
+      <g class="node" data-cam="gen" style="--h: var(--c-gen)">
+        <rect class="frame-hint" x="24" y="10" width="330" height="1240"/>
+        <path class="w" d="M340 72 H217" marker-end="url(#arw)"/>
+        <g class="part" data-part="sample">
+          <rect class="box np" x="40" y="26" width="174" height="88" rx="12"/>
+          <text class="t-box sm" x="54" y="54">Sample</text>
+          <text class="t-code" x="54" y="76">multinomial</text>
+          <text class="t-mini" x="54" y="98">temperature 0.7</text>
+        </g>
+        <path class="w" d="M127 114 V637" marker-end="url(#arw)"/>
+        <text class="t-tag" x="116" y="380" transform="rotate(-90 116 380)" text-anchor="middle">generation loop</text>
+        <g class="part" data-part="append">
+          <rect class="box np" x="40" y="640" width="174" height="80" rx="12"/>
+          <text class="t-box sm" x="54" y="668">Append</text>
+          <text class="t-code" x="54" y="692">cat → (1, T+1)</text>
+        </g>
+        <path class="w" d="M127 720 V1077" marker-end="url(#arw)"/>
+        <g class="part" data-part="crop">
+          <rect class="box np" x="40" y="1080" width="174" height="92" rx="12"/>
+          <text class="t-box sm" x="54" y="1108">Crop to 64</text>
+          <text class="t-code" x="54" y="1132">idx[:, -64:]</text>
+          <text class="t-mini" x="54" y="1154">(1, ≤ 64)</text>
+        </g>
+        <path class="w" d="M214 1126 H315" marker-end="url(#arw)"/>
+        <text class="t-mini" x="226" y="1116">context</text>
+        <g class="part" data-part="prompt">
+          <path class="w" d="M127 1228 V1175" marker-end="url(#arw)"/>
+          <circle class="src" cx="127" cy="1230" r="3"/>
+          <text class="t-mini" x="127" y="1250" text-anchor="middle">prompt → (1, T)</text>
+        </g>
+      </g>
+
+      <!-- ===== output head (top) ===== -->
+      <g class="node" data-cam="head" style="--h: var(--c-soft)">
+        <g class="part" data-part="probs">
+          <rect class="box" x="340" y="8" width="320" height="130" rx="14"/>
+          <text class="t-box sm" x="356" y="34">Next-character probabilities</text>
+          <text class="t-mini" x="356" y="51">after “PROJECT CARD: ”, temperature 1</text>
+          <rect class="bar" x="372" y="64" width="16" height="40" rx="2"/>
+          <rect class="bar" x="408" y="92.8" width="16" height="11.2" rx="2"/>
+          <rect class="bar" x="444" y="97.1" width="16" height="6.9" rx="2"/>
+          <rect class="bar" x="480" y="98.3" width="16" height="5.7" rx="2"/>
+          <rect class="bar" x="516" y="100.4" width="16" height="3.6" rx="1"/>
+          <rect class="bar" x="552" y="102.8" width="16" height="1.2"/>
+          <rect class="bar" x="588" y="102.8" width="16" height="1.2"/>
+          <rect class="bar" x="624" y="102.8" width="16" height="1.2"/>
+          <g class="t-cell" text-anchor="middle">
+            <text x="380" y="119">S</text><text x="416" y="119">R</text><text x="452" y="119">C</text><text x="488" y="119">A</text>
+            <text x="524" y="119">V</text><text x="560" y="119">M</text><text x="596" y="119">P</text><text x="632" y="119">N</text>
+          </g>
+          <g class="t-mini" text-anchor="middle">
+            <text x="380" y="131">56%</text><text x="416" y="131">16%</text><text x="452" y="131">10%</text><text x="488" y="131">8%</text>
+            <text x="524" y="131">5%</text><text x="560" y="131">1%</text><text x="596" y="131">1%</text><text x="632" y="131">0.4%</text>
+          </g>
+        </g>
+        <path class="w" d="M500 158 V141" marker-end="url(#arw)"/>
+        <g class="part" data-part="softmax-out">
+          <rect class="box np" x="420" y="158" width="160" height="38" rx="10"/>
+          <text class="t-box sm" x="500" y="183" text-anchor="middle">Softmax</text>
+        </g>
+        <text class="t-mini" x="588" y="181">in generate()</text>
+        <path class="w" d="M500 220 V199" marker-end="url(#arw)"/>
+        <text class="t-shape" x="512" y="214">logits (32, 64, 97)</text>
+        <g class="part" data-part="linear" style="--h: var(--c-lin)">
+          <rect class="box" x="390" y="220" width="220" height="46" rx="10"/>
+          <text class="t-box sm" x="500" y="249" text-anchor="middle">Linear 128 → 97</text>
+        </g>
+        <path class="w" d="M500 290 V269" marker-end="url(#arw)"/>
+        <g class="part" data-part="lnf" style="--h: var(--c-norm)">
+          <rect class="box" x="420" y="290" width="160" height="36" rx="10"/>
+          <text class="t-box sm" x="500" y="314" text-anchor="middle">LayerNorm</text>
+        </g>
+      </g>
+
+      <!-- ===== the block, stacked four times ===== -->
+      <g data-cam="block">
+        <rect class="frame-hint" x="226" y="318" width="600" height="750"/>
+        <g class="node" style="--h: var(--c-norm)">
+          <g class="part" data-part="stack">
+            <rect class="ghost g3" x="236" y="372" width="528" height="628" rx="26"/>
+            <rect class="ghost g2" x="236" y="372" width="528" height="628" rx="26"/>
+            <rect class="ghost g1" x="236" y="372" width="528" height="628" rx="26"/>
+            <text class="t-x" x="800" y="1040" text-anchor="end">×4</text>
+            <text class="t-mini" x="800" y="1058" text-anchor="end">n_layer = 4 · 198,272 each</text>
+          </g>
+          <rect class="frame" x="236" y="372" width="528" height="628" rx="26"/>
+          <path class="w" d="M500 1026 V971" marker-end="url(#arw)"/>
+          <path class="w" d="M500 930 V908" marker-end="url(#arw)"/>
+          <path class="w" d="M500 672 V657" marker-end="url(#arw)"/>
+          <path class="w" d="M500 626 V615" marker-end="url(#arw)"/>
+          <path class="w" d="M500 578 V559" marker-end="url(#arw)"/>
+          <path class="w" d="M500 444 V427" marker-end="url(#arw)"/>
+          <path class="w" d="M500 396 V329" marker-end="url(#arw)"/>
+          <g class="part" data-part="res1">
+            <path class="w hw" d="M500 985 H258 V640 H483" marker-end="url(#arw)"/>
+            <circle class="branch" cx="500" cy="985" r="3.5"/>
+            <g class="add"><circle cx="500" cy="640" r="14"/><path d="M500 631 V649 M491 640 H509"/></g>
+          </g>
+          <g class="part" data-part="res2">
+            <path class="w hw" d="M500 619 H258 V410 H483" marker-end="url(#arw)"/>
+            <circle class="branch" cx="500" cy="619" r="3.5"/>
+            <g class="add"><circle cx="500" cy="410" r="14"/><path d="M500 401 V419 M491 410 H509"/></g>
+          </g>
+          <text class="t-tag" x="250" y="812" transform="rotate(-90 250 812)" text-anchor="middle">residual</text>
+          <g class="part" data-part="ln1">
+            <rect class="box" x="410" y="930" width="180" height="38" rx="10"/>
+            <text class="t-box sm" x="500" y="955" text-anchor="middle">LayerNorm</text>
+          </g>
+          <g class="part" data-part="ln2">
+            <rect class="box" x="410" y="578" width="180" height="34" rx="10"/>
+            <text class="t-box sm" x="500" y="601" text-anchor="middle">LayerNorm</text>
+          </g>
+        </g>
+
+        <!-- masked multi-head attention -->
+        <g class="node" data-cam="attn" style="--h: var(--c-attn)">
+          <rect class="box" x="280" y="672" width="440" height="233" rx="16"/>
+          <text class="t-box" x="296" y="700">Masked multi-head attention</text>
+          <text class="t-code" x="704" y="699" text-anchor="end">4 heads × 32</text>
+          <path class="flow" d="M342 752 H668 V847 H332"/>
+          <g class="part" data-part="qkv">
+            <rect class="pbox" x="295" y="713" width="95" height="78" rx="8"/>
+            <text class="t-pl" x="303" y="731">qkv</text>
+            <text class="t-mini" x="303" y="752">Linear</text>
+            <text class="t-mini" x="303" y="767">128 → 384</text>
+            <text class="t-micro" x="303" y="784">W 128×384 + b</text>
+          </g>
+          <g class="part" data-part="split">
+            <rect class="pbox np" x="400" y="713" width="95" height="78" rx="8"/>
+            <text class="t-pl" x="408" y="731">split</text>
+            <rect class="glyph" x="410" y="742" width="19" height="36" rx="2"/>
+            <rect class="glyph" x="433" y="742" width="19" height="36" rx="2"/>
+            <rect class="glyph" x="456" y="742" width="19" height="36" rx="2"/>
+            <g class="t-mini" text-anchor="middle"><text x="419.5" y="765">q</text><text x="442.5" y="765">k</text><text x="465.5" y="765">v</text></g>
+            <text class="t-micro" x="408" y="788">3 × 128 wide</text>
+          </g>
+          <g class="part" data-part="heads">
+            <rect class="pbox np" x="505" y="713" width="95" height="78" rx="8"/>
+            <text class="t-pl" x="513" y="731">4 heads</text>
+            <rect class="glyph" x="515" y="741" width="12" height="30" rx="2"/>
+            <rect class="glyph" x="533" y="741" width="12" height="30" rx="2"/>
+            <rect class="glyph" x="551" y="741" width="12" height="30" rx="2"/>
+            <rect class="glyph" x="569" y="741" width="12" height="30" rx="2"/>
+            <g class="t-micro" text-anchor="middle"><text x="521" y="759">h1</text><text x="539" y="759">h2</text><text x="557" y="759">h3</text><text x="575" y="759">h4</text></g>
+            <text class="t-mini" x="592" y="786" text-anchor="end">× 32 dims</text>
+          </g>
+          <g class="part" data-part="scores">
+            <rect class="pbox np" x="610" y="713" width="95" height="78" rx="8"/>
+            <text class="t-pl" x="618" y="731">q·kᵀ / √32</text>
+            <rect class="cell-o" x="636" y="740" width="42" height="42"/>
+            <g class="heat">
+              <rect x="636" y="740" width="7" height="7" style="opacity:.85"/><rect x="643" y="747" width="7" height="7" style="opacity:.6"/>
+              <rect x="650" y="754" width="7" height="7" style="opacity:.75"/><rect x="657" y="761" width="7" height="7" style="opacity:.5"/>
+              <rect x="664" y="768" width="7" height="7" style="opacity:.8"/><rect x="671" y="775" width="7" height="7" style="opacity:.6"/>
+              <rect x="636" y="747" width="7" height="7" style="opacity:.3"/><rect x="643" y="761" width="7" height="7" style="opacity:.25"/>
+              <rect x="650" y="768" width="7" height="7" style="opacity:.35"/><rect x="657" y="775" width="7" height="7" style="opacity:.2"/>
+              <rect x="664" y="747" width="7" height="7" style="opacity:.15"/><rect x="657" y="740" width="7" height="7" style="opacity:.12"/>
+            </g>
+            <text class="t-micro" x="618" y="788">64 × 64 scores</text>
+          </g>
+          <g class="part" data-part="mask">
+            <rect class="pbox np" x="631" y="803" width="74" height="88" rx="8"/>
+            <text class="t-pl" x="639" y="821">mask</text>
+            <rect class="cell-o" x="646" y="832" width="48" height="48"/>
+            <path class="tri" d="M646 832 H652 V838 H658 V844 H664 V850 H670 V856 H676 V862 H682 V868 H688 V874 H694 V880 H646 Z"/>
+            <text class="t-mini" x="691" y="846" text-anchor="end">−∞</text>
+            <text class="t-micro" x="639" y="888">future → −∞</text>
+          </g>
+          <g class="part" data-part="softmax">
+            <rect class="pbox np" x="547" y="803" width="74" height="88" rx="8"/>
+            <text class="t-pl" x="555" y="821">softmax</text>
+            <rect class="glyph" x="557" y="834" width="52" height="7" rx="2"/>
+            <rect class="glyph" x="557" y="846" width="32" height="7" rx="2"/>
+            <rect class="glyph" x="557" y="858" width="16" height="7" rx="2"/>
+            <rect class="glyph" x="557" y="870" width="8" height="7" rx="2"/>
+            <text class="t-micro" x="555" y="888">each row Σ = 1</text>
+          </g>
+          <g class="part" data-part="av">
+            <rect class="pbox np" x="463" y="803" width="74" height="88" rx="8"/>
+            <text class="t-pl" x="471" y="821">@ v</text>
+            <rect class="glyph" x="473" y="836" width="30" height="30" rx="2"/>
+            <text class="t-mini" x="510" y="855" text-anchor="middle">×</text>
+            <rect class="glyph" x="517" y="836" width="9" height="30" rx="2"/>
+            <text class="t-micro" x="471" y="882">weights × values</text>
+          </g>
+          <g class="part" data-part="merge">
+            <rect class="pbox np" x="379" y="803" width="74" height="88" rx="8"/>
+            <text class="t-pl" x="387" y="821">merge</text>
+            <rect class="glyph" x="389" y="836" width="7" height="30" rx="1"/>
+            <rect class="glyph" x="398" y="836" width="7" height="30" rx="1"/>
+            <rect class="glyph" x="407" y="836" width="7" height="30" rx="1"/>
+            <rect class="glyph" x="416" y="836" width="7" height="30" rx="1"/>
+            <text class="t-mini" x="431" y="855" text-anchor="middle">→</text>
+            <rect class="glyph" x="439" y="836" width="10" height="30" rx="2"/>
+            <text class="t-micro" x="387" y="882">4 × 32 → 128</text>
+          </g>
+          <g class="part" data-part="proj">
+            <rect class="pbox" x="295" y="803" width="74" height="88" rx="8"/>
+            <text class="t-pl" x="303" y="821">proj</text>
+            <text class="t-mini" x="303" y="846">Linear</text>
+            <text class="t-mini" x="303" y="861">128 → 128</text>
+            <text class="t-micro" x="303" y="880">W 128×128 + b</text>
+          </g>
+        </g>
+
+        <!-- feed-forward -->
+        <g class="node" data-cam="ffn" style="--h: var(--c-ffn)">
+          <rect class="box" x="320" y="444" width="360" height="112" rx="16"/>
+          <text class="t-box" x="336" y="471">Feed-forward</text>
+          <text class="t-code" x="664" y="470" text-anchor="end">128 → 512 → 128</text>
+          <path class="flow" d="M386 515 H612"/>
+          <g class="part" data-part="up">
+            <rect class="pbox" x="335" y="484" width="103" height="62" rx="8"/>
+            <text class="t-pl" x="343" y="501">Linear</text>
+            <text class="t-mini" x="343" y="516">128 → 512</text>
+            <rect class="glyph" x="410" y="528" width="8" height="12" rx="1"/>
+            <rect class="glyph" x="422" y="506" width="8" height="34" rx="1"/>
+            <text class="t-micro" x="343" y="538">4× wider</text>
+          </g>
+          <g class="part" data-part="relu">
+            <rect class="pbox np" x="448" y="484" width="103" height="62" rx="8"/>
+            <text class="t-pl" x="456" y="501">ReLU</text>
+            <path class="hinge" d="M460 536 H494 L534 508"/>
+          </g>
+          <g class="part" data-part="down">
+            <rect class="pbox" x="561" y="484" width="103" height="62" rx="8"/>
+            <text class="t-pl" x="569" y="501">Linear</text>
+            <text class="t-mini" x="569" y="516">512 → 128</text>
+            <text class="t-mini" x="569" y="532">dropout 0.1</text>
+            <rect class="glyph" x="636" y="506" width="8" height="34" rx="1"/>
+            <rect class="glyph" x="648" y="528" width="8" height="12" rx="1"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- ===== embeddings ===== -->
+      <g class="node" data-cam="emb" style="--h: var(--c-emb)">
+        <text class="t-shape" x="512" y="1017">(32, 64, 128)</text>
+        <g class="part" data-part="add">
+          <g class="add"><circle cx="500" cy="1040" r="14"/><path d="M500 1031 V1049 M491 1040 H509"/></g>
+        </g>
+        <path class="w" d="M404 1080 C404 1056 456 1040 483 1040" marker-end="url(#arw)"/>
+        <path class="w" d="M596 1080 C596 1056 544 1040 517 1040" marker-end="url(#arw)"/>
+        <g class="part" data-part="tok-table">
+          <rect class="box" x="318" y="1080" width="172" height="92" rx="12"/>
+          <text class="t-box sm" x="332" y="1105">Token embedding</text>
+          <text class="t-code" x="332" y="1125">97 × 128</text>
+          <text class="t-mini" x="476" y="1125" text-anchor="end">row 47 = R</text>
+          <rect class="cell-o" x="332" y="1135" width="144" height="26"/>
+          <path class="rule" d="M332 1140.2 H476 M332 1145.4 H476 M332 1150.6 H476 M332 1155.8 H476"/>
+          <rect class="glyph hot" x="332" y="1145.4" width="144" height="5.2"/>
+        </g>
+        <g class="part" data-part="pos-table">
+          <rect class="box" x="510" y="1080" width="172" height="92" rx="12"/>
+          <text class="t-box sm" x="524" y="1105">Position embedding</text>
+          <text class="t-code" x="524" y="1125">64 × 128</text>
+          <text class="t-mini" x="668" y="1125" text-anchor="end">learned</text>
+          <rect class="cell-o" x="524" y="1135" width="144" height="26"/>
+          <path class="rule" d="M524 1140.2 H668 M524 1145.4 H668 M524 1150.6 H668 M524 1155.8 H668"/>
+          <rect class="glyph hot" x="524" y="1135" width="144" height="5.2"/>
+        </g>
+        <path class="w" d="M404 1240 V1175" marker-end="url(#arw)"/>
+        <text class="t-shape" x="414" y="1214">ids (32, 64)</text>
+        <path class="w" d="M596 1230 V1175" marker-end="url(#arw)"/>
+        <circle class="src" cx="596" cy="1232" r="3"/>
+        <text class="t-shape" x="606" y="1214">arange(64)</text>
+      </g>
+
+      <!-- ===== getBatch ===== -->
+      <g class="node" data-cam="batch" style="--h: var(--c-data)">
+        <rect class="box np" x="318" y="1240" width="364" height="98" rx="14"/>
+        <text class="t-box sm" x="332" y="1265">getBatch</text>
+        <text class="t-code" x="332" y="1284">x, y: (32, 64)</text>
+        <g class="part" data-part="trainval">
+          <rect class="glyph hot" x="478" y="1254" width="171" height="10" rx="2"/>
+          <rect class="cell-o" x="651" y="1254" width="17" height="10" rx="2"/>
+          <text class="t-mini" x="478" y="1278">train 90%</text>
+          <text class="t-mini" x="668" y="1278" text-anchor="end">val 10%</text>
+        </g>
+        <g class="part" data-part="starts"><text class="t-mini" x="668" y="1301" text-anchor="end">32 random starts</text></g>
+        <g class="part" data-part="x">
+          <text class="t-pl" x="334" y="1305">x</text>
+          <g class="cells">
+            <rect x="346" y="1294" width="12" height="14"/><rect x="359.5" y="1294" width="12" height="14"/><rect x="373" y="1294" width="12" height="14"/><rect x="386.5" y="1294" width="12" height="14"/>
+            <rect x="400" y="1294" width="12" height="14"/><rect x="413.5" y="1294" width="12" height="14"/><rect x="427" y="1294" width="12" height="14"/><rect x="440.5" y="1294" width="12" height="14"/>
+            <rect x="454" y="1294" width="12" height="14"/><rect x="467.5" y="1294" width="12" height="14"/><rect x="481" y="1294" width="12" height="14"/><rect x="494.5" y="1294" width="12" height="14"/>
+          </g>
+          <g class="t-tiny" text-anchor="middle">
+            <text x="352" y="1304.5">P</text><text x="365.5" y="1304.5">R</text><text x="379" y="1304.5">O</text><text x="392.5" y="1304.5">J</text>
+            <text x="406" y="1304.5">E</text><text x="419.5" y="1304.5">C</text><text x="433" y="1304.5">T</text><text x="446.5" y="1304.5">␣</text>
+            <text x="460" y="1304.5">C</text><text x="473.5" y="1304.5">A</text><text x="487" y="1304.5">R</text><text x="500.5" y="1304.5">D</text>
+          </g>
+        </g>
+        <g class="part" data-part="y">
+          <text class="t-pl" x="334" y="1327">y</text>
+          <g class="cells">
+            <rect x="346" y="1316" width="12" height="14"/><rect x="359.5" y="1316" width="12" height="14"/><rect x="373" y="1316" width="12" height="14"/><rect x="386.5" y="1316" width="12" height="14"/>
+            <rect x="400" y="1316" width="12" height="14"/><rect x="413.5" y="1316" width="12" height="14"/><rect x="427" y="1316" width="12" height="14"/><rect x="440.5" y="1316" width="12" height="14"/>
+            <rect x="454" y="1316" width="12" height="14"/><rect x="467.5" y="1316" width="12" height="14"/><rect x="481" y="1316" width="12" height="14"/><rect x="494.5" y="1316" width="12" height="14"/>
+          </g>
+          <g class="t-tiny" text-anchor="middle">
+            <text x="352" y="1326.5">R</text><text x="365.5" y="1326.5">O</text><text x="379" y="1326.5">J</text><text x="392.5" y="1326.5">E</text>
+            <text x="406" y="1326.5">C</text><text x="419.5" y="1326.5">T</text><text x="433" y="1326.5">␣</text><text x="446.5" y="1326.5">C</text>
+            <text x="460" y="1326.5">A</text><text x="473.5" y="1326.5">R</text><text x="487" y="1326.5">D</text><text x="500.5" y="1326.5">:</text>
+          </g>
+          <text class="t-mini" x="668" y="1327" text-anchor="end">y = x shifted by 1</text>
+        </g>
+      </g>
+
+      <!-- ===== corpus and tokenizer ===== -->
+      <g class="node" data-cam="tok" style="--h: var(--c-data)">
+        <path class="w" d="M500 1382 V1341" marker-end="url(#arw)"/>
+        <text class="t-shape" x="512" y="1367">data (205018,)</text>
+        <g class="part" data-part="vocab">
+          <rect class="box np" x="236" y="1382" width="528" height="126" rx="16"/>
+          <text class="t-box" x="252" y="1411">Corpus → ids</text>
+          <text class="t-code" x="748" y="1410" text-anchor="end">205,018 chars · vocab 97</text>
+        </g>
+        <g class="part" data-part="ids">
+          <g class="cells big">
+            <rect x="252" y="1424" width="34" height="28" rx="4"/><rect x="290" y="1424" width="34" height="28" rx="4"/><rect x="328" y="1424" width="34" height="28" rx="4"/>
+            <rect x="366" y="1424" width="34" height="28" rx="4"/><rect x="404" y="1424" width="34" height="28" rx="4"/><rect x="442" y="1424" width="34" height="28" rx="4"/>
+            <rect x="480" y="1424" width="34" height="28" rx="4"/><rect x="518" y="1424" width="34" height="28" rx="4"/><rect x="556" y="1424" width="34" height="28" rx="4"/>
+            <rect x="594" y="1424" width="34" height="28" rx="4"/><rect x="632" y="1424" width="34" height="28" rx="4"/><rect x="670" y="1424" width="34" height="28" rx="4"/>
+            <rect x="708" y="1424" width="34" height="28" rx="4"/>
+          </g>
+          <g class="t-cell big" text-anchor="middle">
+            <text x="269" y="1443">P</text><text x="307" y="1443">R</text><text x="345" y="1443">O</text><text x="383" y="1443">J</text><text x="421" y="1443">E</text>
+            <text x="459" y="1443">C</text><text x="497" y="1443">T</text><text x="535" y="1443">␣</text><text x="573" y="1443">C</text><text x="611" y="1443">A</text>
+            <text x="649" y="1443">R</text><text x="687" y="1443">D</text><text x="725" y="1443">:</text>
+          </g>
+          <g class="t-id" text-anchor="middle">
+            <text x="269" y="1470">45</text><text x="307" y="1470">47</text><text x="345" y="1470">44</text><text x="383" y="1470">39</text><text x="421" y="1470">34</text>
+            <text x="459" y="1470">32</text><text x="497" y="1470">49</text><text x="535" y="1470">1</text><text x="573" y="1470">32</text><text x="611" y="1470">30</text>
+            <text x="649" y="1470">47</text><text x="687" y="1470">33</text><text x="725" y="1470">25</text>
+          </g>
+          <text class="t-mini" x="252" y="1496">“PROJECT CARD:” as the model sees it</text>
+        </g>
+      </g>
+
+      <!-- ===== training loop (right rail) ===== -->
+      <g class="node" data-cam="train" style="--h: var(--c-train)">
+        <rect class="frame-hint" x="600" y="140" width="400" height="540"/>
+        <path class="w" d="M610 243 H700 C760 243 790 198 827 198" marker-end="url(#arw)"/>
+        <text class="t-mini" x="704" y="236">logits</text>
+        <path class="w" d="M682 1290 H990 V198 H978" marker-end="url(#arw)"/>
+        <text class="t-shape" x="980" y="760" transform="rotate(-90 980 760)" text-anchor="middle">targets y (32, 64)</text>
+        <g class="part" data-part="loss">
+          <rect class="box np" x="830" y="152" width="145" height="96" rx="12"/>
+          <text class="t-box sm" x="844" y="180">Cross-entropy</text>
+          <text class="t-code" x="844" y="202">4.67 → 0.44</text>
+          <text class="t-mini" x="844" y="221">softmax inside</text>
+          <text class="t-mini" x="844" y="236">3,000 steps</text>
+        </g>
+        <path class="w" d="M902 248 V557" marker-end="url(#arw)"/>
+        <text class="t-mini" x="910" y="404">gradients</text>
+        <g class="part" data-part="adamw">
+          <rect class="box np" x="830" y="560" width="145" height="96" rx="12"/>
+          <text class="t-box sm" x="844" y="588">AdamW</text>
+          <text class="t-code" x="844" y="610">lr 3e-3</text>
+          <text class="t-mini" x="844" y="630">826,465 params</text>
+        </g>
+        <path class="w dash" d="M830 608 H775" marker-end="url(#arw)"/>
+        <text class="t-mini" x="802" y="598" text-anchor="middle">update</text>
+      </g>
+
+      <!-- data flowing up the forward pass (home screen only) -->
+      <path class="pulse" d="M500 1500 V1250 C500 1205 404 1215 404 1172 V1080 C404 1056 456 1040 500 1040 V8"/>
+    </svg>
+    <p class="crumb" hidden></p>
+  </div>
+
+  <div class="stops">
+    <section class="stop home" data-path="" aria-label="The RamV1 architecture">
+      <div class="home-ui">
+        <button class="btn btn-primary" type="button" data-tour><span class="tri" aria-hidden="true"></span>Play the tour</button>
+        <a class="scroll-hint" href="#start"><span>Scroll down to explore</span><span class="chev" aria-hidden="true"></span></a>
+      </div>
+    </section>
+
+    <section class="stop intro" id="start" data-path="" data-crumb="RamV1" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta">Character-level GPT · PyTorch · built from scratch</p>
+        <h1 class="wordmark">Ram<em>V1</em></h1>
+        <p class="lead">A small transformer I wrote line by line. Keep scrolling: the camera flies into every block, down to the lines of code that run it.</p>
+        <dl class="specs">
+          <div><dt>Parameters</dt><dd>826,465</dd></div>
+          <div><dt>Blocks × heads</dt><dd>4 × 4</dd></div>
+          <div><dt>Width</dt><dd>128</dd></div>
+          <div><dt>Context</dt><dd>64 chars</dd></div>
+          <div><dt>Vocabulary</dt><dd>97 chars</dd></div>
+          <div><dt>Training</dt><dd>9.4 min, CPU</dd></div>
+        </dl>
+        <p class="key-legend"><span class="sw solid"></span> learned weights <span class="sw dashed"></span> no weights</p>
+        <div class="actions">
+          <button class="btn btn-primary" type="button" data-tour><span class="tri" aria-hidden="true"></span>Play the tour</button>
+          <a class="btn" href="#results">Skip to results</a>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===== data ===== -->
+    <section class="stop" data-path="tok" data-crumb="Corpus" style="--h: var(--c-data)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">tokenizer.py</span><span>lines 12–16</span></p>
+        <h2>Text becomes numbers</h2>
+<pre class="snip" data-lines="12-16"><code>chars = sorted(set(text))
+vocab_size = len(chars)
+
+stoi = {ch: i for i, ch in enumerate(chars)}  # char -&gt; id
+itos = {i: ch for i, ch in enumerate(chars)}  # id -&gt; char</code></pre>
+        <p class="card-note"><span class="chip">205,018 chars → 97 ids</span><span>Every distinct character gets a fixed id. Sorting makes the mapping identical on every run.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="tok/ids" data-crumb="Corpus › Ids" style="--h: var(--c-data)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">tokenizer.py</span><span>lines 19–20, 28</span></p>
+        <h2>“PROJECT CARD:” as the model sees it</h2>
+<pre class="snip" data-lines="19-20"><code>def encode(s):
+    return [stoi[c] for c in s]</code></pre>
+<pre class="snip" data-lines="28"><code>data = torch.tensor(encode(text), dtype=torch.long)</code></pre>
+        <p class="card-note"><span class="chip">(205018,) long</span><span>The whole corpus becomes one long tensor of integers. “Ram” is [47, 60, 72].</span></p>
+      </article>
+    </section>
+
+    <section class="stop" data-path="batch" data-crumb="getBatch" style="--h: var(--c-data)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">dataset.py</span><span>lines 11–13</span></p>
+        <h2>One clean split</h2>
+<pre class="snip" data-lines="11-13"><code>train_size = int(0.9 * len(data))
+val_size = len(data) - train_size
+train_data , val_data = data[:train_size] , data[train_size:]</code></pre>
+        <p class="card-note"><span class="chip">184,516 | 20,502</span><span>The first 90% trains, the last 10% validates. One cut keeps the text in order.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="batch/y" data-crumb="getBatch › x, y" style="--h: var(--c-data)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">dataset.py</span><span>lines 19–24</span></p>
+        <h2>Predict the next character</h2>
+<pre class="snip" data-lines="19-24"><code>    ix = torch.randint(high = len(d)-64 , size = (32,))
+
+    # Get the trining data batches
+    x = torch.stack([d[i : i+64] for i in ix])
+    # get the target data because we want our model to predict the next word so i+1
+    y = torch.stack([d[i+1 : i+64+1] for i in ix])</code></pre>
+        <p class="card-note"><span class="chip">x, y: (32, 64)</span><span>32 random windows of 64 characters. y is x shifted one step, so every window holds 64 predictions.</span></p>
+      </article>
+    </section>
+
+    <!-- ===== embeddings ===== -->
+    <section class="stop" data-path="emb" data-crumb="Embeddings" style="--h: var(--c-emb)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 90–91</span></p>
+        <h2>Ids become vectors</h2>
+<pre class="snip" data-lines="90-91"><code>        self.tkn_emb = nn.Embedding(vocab_size , d_model)
+        self.pos_emb = nn.Embedding(block_size , d_model)</code></pre>
+        <p class="card-note"><span class="chip">97 × 128 · 64 × 128</span><span>One learned row per character, and one learned row per position in the window. Learned, not the paper's sine waves.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="emb/add" data-crumb="Embeddings › Add" style="--h: var(--c-emb)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 101</span></p>
+        <h2>Add them together</h2>
+<pre class="snip" data-lines="101"><code>        x = self.tkn_emb(idx) + self.pos_emb(torch.arange(char_perBatch))    # (shape of Batch_size , char_perBatch , Embedding_size)</code></pre>
+        <p class="card-note"><span class="chip">(32, 64, 128)</span><span>(64, 128) broadcasts across the batch: every sequence gets the same position vectors.</span></p>
+      </article>
+    </section>
+
+    <!-- ===== the block ===== -->
+    <section class="stop" data-path="block" data-crumb="Block" style="--h: var(--c-norm)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py · class Block</span><span>lines 80–83</span></p>
+        <h2>One transformer block</h2>
+<pre class="snip" data-lines="80-83"><code>    def forward(self , x):
+        x = x + self.attn(self.layerNorm1(x))
+        x = x + self.ffn(self.layerNorm2(x))
+        return x</code></pre>
+        <p class="card-note"><span class="chip">(32, 64, 128) in and out</span><span>Attention, then feed-forward, each wrapped in a LayerNorm and a residual connection.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/ln1" data-crumb="Block › LayerNorm" style="--h: var(--c-norm)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 75, 81</span></p>
+        <h2>Normalize first</h2>
+<pre class="snip" data-lines="75"><code>        self.layerNorm1 = nn.LayerNorm(d_model)</code></pre>
+<pre class="snip" data-lines="81"><code>        x = x + self.attn(self.layerNorm1(x))</code></pre>
+        <p class="card-note"><span class="chip">pre-norm</span><span>Only the copy that goes into attention is normalized. The main stream stays untouched.</span></p>
+      </article>
+    </section>
+
+    <section class="stop" data-path="block/attn" data-crumb="Block › Attention" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py · class MultiHeadAttention</span><span>lines 15–21</span></p>
+        <h2>Masked multi-head attention</h2>
+<pre class="snip" data-lines="15-21"><code>class MultiHeadAttention(nn.Module):
+    def __init__(self):
+        super().__init__()
+        assert d_model % n_head == 0
+        self.head_dim = d_model // n_head
+        self.qkv = nn.Linear(d_model , d_model * 3)
+        self.proj = nn.Linear(d_model , d_model)    # Used to multiply with all head concatenation</code></pre>
+        <p class="card-note"><span class="chip">4 heads × 32</span><span>Written by hand instead of calling <code>nn.MultiheadAttention</code>. 66,048 parameters.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/qkv" data-crumb="Block › Attention › qkv" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 20</span></p>
+        <h2>Queries, keys, values</h2>
+<pre class="snip" data-lines="20"><code>        self.qkv = nn.Linear(d_model , d_model * 3)</code></pre>
+        <p class="card-note"><span class="chip">128 → 384</span><span>One Linear computes q, k and v together.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/split" data-crumb="Block › Attention › Split" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 31</span></p>
+        <h2>Split three ways</h2>
+<pre class="snip" data-lines="31"><code>        q , k , v = self.qkv(x).split(E , dim = 2)    # Our qkv</code></pre>
+        <p class="card-note"><span class="chip">3 × (32, 64, 128)</span><span>In my code <code>C</code> is the sequence length and <code>E</code> the width.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/heads" data-crumb="Block › Attention › 4 heads" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 36–38</span></p>
+        <h2>Four heads</h2>
+<pre class="snip" data-lines="36-38"><code>        q = q.view(B , C , n_head , self.head_dim).transpose(1 , 2)
+        k = k.view(B , C , n_head , self.head_dim).transpose(1 , 2)
+        v = v.view(B , C , n_head , self.head_dim).transpose(1 , 2)</code></pre>
+        <p class="card-note"><span class="chip">(32, 4, 64, 32)</span><span><code>view</code> exposes 4 heads of 32. <code>transpose</code> moves the heads next to the batch, so each head attends on its own.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/scores" data-crumb="Block › Attention › Scores" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 41</span></p>
+        <h2>Every position scores every position</h2>
+<pre class="snip" data-lines="41"><code>        attention_weight = (q @  k.transpose(-2 , -1)) / self.head_dim ** 0.5</code></pre>
+        <p class="card-note"><span class="chip">(32, 4, 64, 64)</span><span>Divided by √32 so the softmax doesn't saturate.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/mask" data-crumb="Block › Attention › Mask" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 24, 44</span></p>
+        <h2>Hide the future</h2>
+<pre class="snip" data-lines="24"><code>        self.register_buffer('mask', torch.tril(torch.ones(block_size, block_size)))      # for creating a mask where all upper triangle</code></pre>
+<pre class="snip" data-lines="44"><code>        attention_weight = attention_weight.masked_fill(self.mask[:C , :C] == 0 , float("-inf"))</code></pre>
+        <p class="card-note"><span class="chip">−∞ above the diagonal</span><span>A fixed lower-triangular buffer. Future scores become −inf, so they get exactly zero weight.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/softmax" data-crumb="Block › Attention › Softmax" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 47–48</span></p>
+        <h2>Scores become weights</h2>
+<pre class="snip" data-lines="47-48"><code>        attention_weight = F.softmax(attention_weight , dim = -1)
+        attention_weight = self.attn_dropOut(attention_weight)</code></pre>
+        <p class="card-note"><span class="chip">each row sums to 1</span><span>Softmax over the keys, then dropout 0.1.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/av" data-crumb="Block › Attention › Mix values" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 50</span></p>
+        <h2>Mix the values</h2>
+<pre class="snip" data-lines="50"><code>        out = attention_weight @ v</code></pre>
+        <p class="card-note"><span class="chip">(32, 4, 64, 32)</span><span>Each position takes a weighted mix of the values it is allowed to see.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/merge" data-crumb="Block › Attention › Merge" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 54</span></p>
+        <h2>Heads side by side</h2>
+<pre class="snip" data-lines="54"><code>        out = out.transpose(1 , 2).contiguous().view(B , C , E)</code></pre>
+        <p class="card-note"><span class="chip">(32, 64, 128)</span><span><code>contiguous()</code> first, because <code>view</code> can't read memory that <code>transpose</code> has reordered.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/attn/proj" data-crumb="Block › Attention › Projection" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 21, 55</span></p>
+        <h2>Mix the heads</h2>
+<pre class="snip" data-lines="21"><code>        self.proj = nn.Linear(d_model , d_model)    # Used to multiply with all head concatenation</code></pre>
+<pre class="snip" data-lines="55"><code>        out = self.res_dropOut(self.proj(out))</code></pre>
+        <p class="card-note"><span class="chip">128 → 128</span><span>A last Linear blends what the four heads found, then dropout.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/res1" data-crumb="Block › Residual" style="--h: var(--c-norm)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 81</span></p>
+        <h2>The residual highway</h2>
+<pre class="snip" data-lines="81"><code>        x = x + self.attn(self.layerNorm1(x))</code></pre>
+        <p class="card-note"><span class="chip">x + attn(LN(x))</span><span><code>x</code> travels around attention unchanged, and the result is added on top.</span></p>
+      </article>
+    </section>
+
+    <section class="stop" data-path="block/ffn" data-crumb="Block › Feed-forward" style="--h: var(--c-ffn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py · class FFN</span><span>lines 62–67</span></p>
+        <h2>Feed-forward</h2>
+<pre class="snip" data-lines="62-67"><code>        self.net = nn.Sequential(
+            nn.Linear(d_model , d_model * 4),
+            nn.ReLU(),
+            nn.Linear(d_model * 4 , d_model),
+            nn.Dropout(drop)
+        )</code></pre>
+        <p class="card-note"><span class="chip">128 → 512 → 128</span><span>Works on each position alone. 131,712 parameters, twice as many as attention.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/ffn/up" data-crumb="Block › Feed-forward › Widen" style="--h: var(--c-ffn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 63</span></p>
+        <h2>Widen</h2>
+<pre class="snip" data-lines="63"><code>            nn.Linear(d_model , d_model * 4),</code></pre>
+        <p class="card-note"><span class="chip">(32, 64, 512)</span><span>Every position's vector, four times wider.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/ffn/relu" data-crumb="Block › Feed-forward › ReLU" style="--h: var(--c-ffn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 64</span></p>
+        <h2>Bend</h2>
+<pre class="snip" data-lines="64"><code>            nn.ReLU(),</code></pre>
+        <p class="card-note"><span class="chip">max(0, x)</span><span>Without this nonlinearity, the two Linear layers would collapse into one.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/ffn/down" data-crumb="Block › Feed-forward › Narrow" style="--h: var(--c-ffn)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 65–66</span></p>
+        <h2>Narrow back</h2>
+<pre class="snip" data-lines="65-66"><code>            nn.Linear(d_model * 4 , d_model),
+            nn.Dropout(drop)</code></pre>
+        <p class="card-note"><span class="chip">(32, 64, 128)</span><span>Back to the model width, then dropout 0.1.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="block/res2" data-crumb="Block › Residual" style="--h: var(--c-norm)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>line 82</span></p>
+        <h2>The second residual</h2>
+<pre class="snip" data-lines="82"><code>        x = x + self.ffn(self.layerNorm2(x))</code></pre>
+        <p class="card-note"><span class="chip">x + ffn(LN(x))</span><span>The same pattern around the feed-forward network.</span></p>
+      </article>
+    </section>
+
+    <section class="stop" data-path="block/stack" data-crumb="Block × 4" style="--h: var(--c-norm)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 92–94</span></p>
+        <h2>Four blocks deep</h2>
+<pre class="snip" data-lines="92-94"><code>        self.blocks = nn.Sequential(
+            *[Block() for _ in range(n_layer)]
+           )</code></pre>
+        <p class="card-note"><span class="chip">4 × 198,272</span><span>The <code>*</code> unpacks the list into separate arguments for <code>nn.Sequential</code>.</span></p>
+      </article>
+    </section>
+
+    <!-- ===== output ===== -->
+    <section class="stop" data-path="head" data-crumb="Output" style="--h: var(--c-lin)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 95–96, 102</span></p>
+        <h2>From vectors to scores</h2>
+<pre class="snip" data-lines="95-96"><code>        self.layer_normal = nn.LayerNorm(d_model)
+        self.final_nnLayer = nn.Linear(d_model , vocab_size)</code></pre>
+<pre class="snip" data-lines="102"><code>        x = self.final_nnLayer(self.layer_normal(self.blocks(x)))    # It will return logits of shape   (Batch_size , char_perBatch , vocab_size)</code></pre>
+        <p class="card-note"><span class="chip">(32, 64, 97)</span><span>A final LayerNorm and one Linear: one score for every character in the vocabulary.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="head/probs" data-crumb="Output › Probabilities" style="--h: var(--c-soft)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">generator.py</span><span>lines 20–21</span></p>
+        <h2>A guess for the next character</h2>
+<pre class="snip" data-lines="20-21"><code>        logit = logit[: , -1 , :] / temperature
+        probability = F.softmax(logit , dim = -1)</code></pre>
+        <p class="card-note"><span class="chip">S 56% · R 16% · C 10%</span><span>What the trained model expects after “PROJECT CARD: ”, at temperature 1.</span></p>
+      </article>
+    </section>
+
+    <!-- ===== training ===== -->
+    <section class="stop" data-path="train/loss" data-crumb="Training › Loss" style="--h: var(--c-train)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">model.py</span><span>lines 107–109</span></p>
+        <h2>Measure the mistake</h2>
+<pre class="snip" data-lines="107-109"><code>        loss = F.cross_entropy(
+            x.reshape(Batch_size * char_perBatch , vocab_size) ,
+            target.reshape(Batch_size * char_perBatch))</code></pre>
+        <p class="card-note"><span class="chip">(2048, 97) vs (2048,)</span><span><code>cross_entropy</code> wants the classes in dimension 1, so batch and time are flattened. An untrained model scores about ln 97 ≈ 4.57.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="train/adamw" data-crumb="Training › AdamW" style="--h: var(--c-train)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">train.py</span><span>lines 14, 38–42</span></p>
+        <h2>Learn from it</h2>
+<pre class="snip" data-lines="14"><code>optim = torch.optim.AdamW(model.parameters() , lr = lr)</code></pre>
+<pre class="snip" data-lines="38-42"><code>    x , y = getBatch("train")
+    logit , loss = model(x , y)
+    loss.backward()
+    optim.step()
+    optim.zero_grad()</code></pre>
+        <p class="card-note"><span class="chip">lr 3e-3 · 3,000 steps</span><span>Forward, backward, update, clear. 9.4 minutes on a laptop CPU.</span></p>
+      </article>
+    </section>
+
+    <!-- ===== generation ===== -->
+    <section class="stop" data-path="gen/crop" data-crumb="Generate › Context" style="--h: var(--c-gen)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">generator.py</span><span>lines 15–17</span></p>
+        <h2>Write: keep the last 64</h2>
+<pre class="snip" data-lines="15-17"><code>    idx = torch.tensor([encode(prompt)] , dtype = torch.long)
+    for _ in range(max_new_chars):
+        idx_cond = idx[: , - block_size : ]</code></pre>
+        <p class="card-note"><span class="chip">(1, ≤ 64)</span><span>The prompt is a batch of one. Every step keeps only the last 64 columns, all the position table knows.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="gen/sample" data-crumb="Generate › Sample" style="--h: var(--c-gen)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">generator.py</span><span>line 25</span></p>
+        <h2>Pick one</h2>
+<pre class="snip" data-lines="25"><code>        next_id = torch.multinomial(probability , num_samples = 1)</code></pre>
+        <p class="card-note"><span class="chip">(1, 1)</span><span>Sample instead of always taking the top choice, so the text varies.</span></p>
+      </article>
+    </section>
+
+    <section class="stop minor" data-path="gen/append" data-crumb="Generate › Append" style="--h: var(--c-gen)">
+      <article class="card">
+        <p class="card-meta"><span class="dot"></span><span class="file">generator.py</span><span>line 28</span></p>
+        <h2>Append and repeat</h2>
+<pre class="snip" data-lines="28"><code>        idx = torch.cat((idx , next_id) , dim = 1)</code></pre>
+        <p class="card-note"><span class="chip">(1, T + 1)</span><span>The new character joins the context and the loop runs again.</span></p>
+      </article>
+    </section>
+
+    <section class="stop outro" data-path="" data-crumb="RamV1" style="--h: var(--c-attn)">
+      <article class="card">
+        <p class="card-meta">That's the whole model</p>
+        <h2>826,465 parameters, every line by hand.</h2>
+        <p class="lead">Below: how it trained, what it writes, and the bugs that taught me the most.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#results">See the results</a>
+          <button class="btn" type="button" data-tour>Play the tour again</button>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>
+
+<main class="after" id="results">
+  <section class="section">
+    <p class="eyebrow"><span class="dot" style="--h: var(--c-train)"></span>Training</p>
+    <h2>How it trained</h2>
+    <p>3,000 steps of AdamW, batches of 32 × 64 characters, on a laptop CPU. Each point averages 50 batches with dropout switched off.</p>
+    <figure class="chart-card beat" data-kind="chart">
+      <h3>Loss over 3,000 steps</h3>
+      <ul class="legend">
+        <li><span class="key s1"></span>train</li>
+        <li><span class="key s2"></span>validation</li>
+      </ul>
+      <div class="chart-plot"></div>
+      <figcaption>Both curves start near ln 97 ≈ 4.57, the loss of a uniform guess over 97 characters. The evaluations bunch up at steps 0, 1, 4, 5, 256, 257… because of a bug (lesson 3). The validation text later turned out to appear word for word in the training text, so the validation curve measures recall, not generalization (lesson 6).</figcaption>
+      <details class="table-view">
+        <summary>Show the 49 evaluations as a table</summary>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">step</th><th scope="col">train</th><th scope="col">val</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>4.667</td><td>4.662</td></tr>
+              <tr><td>1</td><td>3.744</td><td>3.714</td></tr>
+              <tr><td>4</td><td>3.254</td><td>3.157</td></tr>
+              <tr><td>5</td><td>3.196</td><td>3.089</td></tr>
+              <tr><td>256</td><td>1.449</td><td>1.521</td></tr>
+              <tr><td>257</td><td>1.458</td><td>1.525</td></tr>
+              <tr><td>260</td><td>1.450</td><td>1.504</td></tr>
+              <tr><td>261</td><td>1.463</td><td>1.538</td></tr>
+              <tr><td>512</td><td>1.035</td><td>1.152</td></tr>
+              <tr><td>513</td><td>1.053</td><td>1.172</td></tr>
+              <tr><td>516</td><td>1.040</td><td>1.133</td></tr>
+              <tr><td>517</td><td>1.034</td><td>1.163</td></tr>
+              <tr><td>768</td><td>0.844</td><td>0.977</td></tr>
+              <tr><td>769</td><td>0.835</td><td>0.979</td></tr>
+              <tr><td>772</td><td>0.838</td><td>1.000</td></tr>
+              <tr><td>773</td><td>0.836</td><td>0.992</td></tr>
+              <tr><td>1024</td><td>0.748</td><td>0.864</td></tr>
+              <tr><td>1025</td><td>0.730</td><td>0.862</td></tr>
+              <tr><td>1028</td><td>0.713</td><td>0.871</td></tr>
+              <tr><td>1029</td><td>0.727</td><td>0.851</td></tr>
+              <tr><td>1280</td><td>0.667</td><td>0.819</td></tr>
+              <tr><td>1281</td><td>0.653</td><td>0.812</td></tr>
+              <tr><td>1284</td><td>0.665</td><td>0.810</td></tr>
+              <tr><td>1285</td><td>0.639</td><td>0.814</td></tr>
+              <tr><td>1536</td><td>0.607</td><td>0.751</td></tr>
+              <tr><td>1537</td><td>0.591</td><td>0.752</td></tr>
+              <tr><td>1540</td><td>0.601</td><td>0.732</td></tr>
+              <tr><td>1541</td><td>0.610</td><td>0.735</td></tr>
+              <tr><td>1792</td><td>0.555</td><td>0.702</td></tr>
+              <tr><td>1793</td><td>0.556</td><td>0.714</td></tr>
+              <tr><td>1796</td><td>0.554</td><td>0.710</td></tr>
+              <tr><td>1797</td><td>0.562</td><td>0.713</td></tr>
+              <tr><td>2048</td><td>0.519</td><td>0.679</td></tr>
+              <tr><td>2049</td><td>0.511</td><td>0.689</td></tr>
+              <tr><td>2052</td><td>0.537</td><td>0.676</td></tr>
+              <tr><td>2053</td><td>0.534</td><td>0.698</td></tr>
+              <tr><td>2304</td><td>0.487</td><td>0.658</td></tr>
+              <tr><td>2305</td><td>0.510</td><td>0.649</td></tr>
+              <tr><td>2308</td><td>0.502</td><td>0.649</td></tr>
+              <tr><td>2309</td><td>0.490</td><td>0.670</td></tr>
+              <tr><td>2560</td><td>0.482</td><td>0.638</td></tr>
+              <tr><td>2561</td><td>0.471</td><td>0.632</td></tr>
+              <tr><td>2564</td><td>0.474</td><td>0.639</td></tr>
+              <tr><td>2565</td><td>0.470</td><td>0.623</td></tr>
+              <tr><td>2816</td><td>0.453</td><td>0.606</td></tr>
+              <tr><td>2817</td><td>0.457</td><td>0.604</td></tr>
+              <tr><td>2820</td><td>0.460</td><td>0.604</td></tr>
+              <tr><td>2821</td><td>0.451</td><td>0.625</td></tr>
+              <tr><td>2999</td><td>0.438</td><td>0.593</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </figure>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow"><span class="dot" style="--h: var(--c-gen)"></span>Generation</p>
+    <h2>What it writes</h2>
+    <figure class="term beat" data-kind="term" style="--h: var(--c-gen)">
+      <figcaption class="term-head"><span>generate("PROJECT CARD:", temperature=0.7)</span><span>seed 234 · 300 new characters</span></figcaption>
+      <pre class="term-body"><span class="prompt">PROJECT CARD:</span><span class="term-out"> VIELP, APPLICIQ
+Category: computer vision
+Work wants mentioned: application
+- recruiter message
+- Short
+- short
+- interviews
+- preserve uncertainty
+- Been used corporate language
+- project deployment
+- graph neural networks
+- deployment
+- Optimize AI / MCP
+- English tool / AttnUNet-Vigil.
+- TypeScr</span></pre>
+    </figure>
+    <div class="after-term">
+      <p>Real output from the trained checkpoint. It learned the shape of my profile cards (a header, a category, bullet lists) and fills them with recombined fragments. “VIELP, APPLICIQ” is invented: after “PROJECT CARD: ” the letter V had a 2.4% chance at temperature 0.7, and the sampler picked it.</p>
+      <table class="mini-table">
+        <caption>How much of the output is copied from the corpus</caption>
+        <thead><tr><th scope="col">temperature</th><th scope="col">30-character windows found word for word</th></tr></thead>
+        <tbody>
+          <tr><td>0.5</td><td>42%</td></tr>
+          <tr><td>0.8</td><td>28%</td></tr>
+          <tr><td>1.2</td><td>20%</td></tr>
+        </tbody>
+      </table>
+      <p class="small">8 samples of 300 characters per temperature. Lower temperature, more memorization: with 826,465 parameters and about 100K unique characters of text, copying is easier than generalizing.</p>
+    </div>
+  </section>
+
+  <section class="section lessons">
+    <p class="eyebrow"><span class="dot" style="--h: var(--ink-2)"></span>Debugging</p>
+    <h2>What broke, and what I learned</h2>
+    <p>Some of these crashed far from their cause. Others ran without complaint and quietly gave wrong results. Each one taught me more about PyTorch than reading did.</p>
+    <div class="lesson-list">
+      <article class="lesson beat" data-kind="lesson" style="--lh: var(--c-data)">
+        <h3><span class="n">Lesson 1</span>The split scrambled my text</h3>
+        <dl>
+          <dt>Symptom</dt><dd>The training text decoded to <code>'eeoIrsvpiNeP rtlt=u =nJpp wt 0"ou Huod'</code>.</dd>
+          <dt>Cause</dt><dd><code>random_split</code> shuffles items, and every item was a single character.</dd>
+          <dt>Fix</dt><dd>Two slices: <code>data[:n]</code> and <code>data[n:]</code>.</dd>
+        </dl>
+        <p class="take">Shuffle which windows you pick, never the characters inside them.</p>
+      </article>
+      <article class="lesson beat" data-kind="lesson" style="--lh: var(--c-norm)">
+        <h3><span class="n">Lesson 2</span>One block instead of four</h3>
+        <dl>
+          <dt>Symptom</dt><dd>231,649 parameters instead of 826,465. Shapes and loss looked normal.</dd>
+          <dt>Cause</dt><dd><code>self.block = Block()</code> built a single block.</dd>
+          <dt>Fix</dt><dd><code>nn.Sequential(*[Block() for _ in range(n_layer)])</code></dd>
+        </dl>
+        <p class="take">The gap was exactly 3 × 198,272. Only the parameter count could see it.</p>
+      </article>
+      <article class="lesson beat" data-kind="lesson" style="--lh: var(--c-train)">
+        <h3><span class="n">Lesson 3</span><code class="h">&amp;</code> is not <code class="h">%</code></h3>
+        <dl>
+          <dt>Symptom</dt><dd>Evaluations at steps 0, 1, 4, 5, 256, 257… 49 of them instead of 13. The chart above comes from that run.</dd>
+          <dt>Cause</dt><dd><code>step &amp; 250</code> is a bitwise AND. I meant <code>step % 250</code>.</dd>
+          <dt>Fix</dt><dd>One character.</dd>
+        </dl>
+        <p class="take">The bugs that run without errors are the expensive ones.</p>
+      </article>
+      <article class="lesson beat" data-kind="lesson" style="--lh: var(--c-train)">
+        <h3><span class="n">Lesson 4</span>The learning rate never arrived</h3>
+        <dl>
+          <dt>Symptom</dt><dd>None. Training just ran.</dd>
+          <dt>Cause</dt><dd><code>lr = 3e-3</code> was defined but never passed, so AdamW used its default of 1e-3.</dd>
+          <dt>Fix</dt><dd><code>torch.optim.AdamW(model.parameters(), lr=lr)</code></dd>
+        </dl>
+        <p class="take">An argument you forget to pass becomes a silent default.</p>
+      </article>
+      <article class="lesson beat" data-kind="lesson" style="--lh: var(--c-gen)">
+        <h3><span class="n">Lesson 5</span>Slicing the wrong axis</h3>
+        <dl>
+          <dt>Symptom</dt><dd><code>IndexError: index out of range</code> inside the position embedding, 52 characters into generation.</dd>
+          <dt>Cause</dt><dd><code>idx[-64:]</code> slices rows of a (1, T) tensor, so nothing was cropped. At T = 65 the position table ran out.</dd>
+          <dt>Fix</dt><dd><code>idx[:, -64:]</code></dd>
+        </dl>
+        <p class="take">In a 2-D slice, the comma separates rows from columns.</p>
+      </article>
+      <article class="lesson beat" data-kind="lesson" style="--lh: var(--c-data)">
+        <h3><span class="n">Lesson 6</span>The validation set was inside the training set</h3>
+        <dl>
+          <dt>Symptom</dt><dd>Validation loss kept falling to 0.59 and never pulled away from training loss.</dd>
+          <dt>Cause</dt><dd>The corpus repeats itself: 5,030 lines, only 2,173 unique. Every 64-character window of the validation text also appears in the training text.</dd>
+          <dt>Fix</dt><dd>For the next version: remove duplicates first, then split.</dd>
+        </dl>
+        <p class="take">A validation set only means something if the model has never seen it.</p>
+      </article>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <h2 class="wordmark small">Ram<em>V1</em></h2>
+    <p>Built by Ram, one block at a time. Every line of the model, the training loop and the sampler is written by hand in PyTorch.</p>
+    <div class="actions">
+      <button class="btn btn-primary" type="button" data-tour><span class="tri" aria-hidden="true"></span>Play the tour again</button>
+      <a class="btn" href="#top">Back to the architecture</a>
+    </div>
+    <p class="credit">The diagram's colors follow Figure 1 of “Attention Is All You Need” (Vaswani et al., 2017).</p>
+  </footer>
+</main>
+
+<button class="tour-fab" type="button" data-tour><span class="tri" aria-hidden="true"></span><span class="label">Play tour</span></button>
+
+<script>window.Prism = { manual: true };</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script defer src="site.js"></script>
+</body>
+</html>

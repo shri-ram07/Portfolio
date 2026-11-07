@@ -2,10 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* palette, picked in OKLCH: neutrals carry a trace of the pine accent's hue (165) */
+:root {
+  --paper: #f6faf8;
+  --surface: #fdfefe;
+  --ink: #171f1b;
+  --ink-2: #444d48;
+  --ink-3: #666e6a;
+  --line: rgba(23, 31, 27, 0.12);
+  --line-strong: rgba(23, 31, 27, 0.28);
+  --chip: rgba(23, 31, 27, 0.06);
+  --accent: #1b674c;
+}
+
 html,
 body {
-  background: #f6f3ee;
-  color: #16150f;
+  background: var(--paper);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -26,17 +39,33 @@ html.lenis body {
 }
 
 ::selection {
-  background: #16150f;
-  color: #ffd66b;
+  background: var(--accent);
+  color: #fff;
 }
 
-/* hover + ::after states (design's style-hover / style-after attrs);
-   hover only where there's a mouse, so a tap doesn't leave a card stuck mid-slide */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* every card on the page: solid surface, hairline border, no shadow */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+/* hover only where there's a mouse, so a tap doesn't leave a card stuck mid-slide */
 .pill { transition: background 0.3s; }
-.lift { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.lift { transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s; }
 @media (hover: hover) {
-  .pill:hover { background: rgba(255, 255, 255, 0.9); }
-  .lift:hover { transform: translateX(8px); }
+  .pill:hover { background: var(--chip); }
+  .lift:hover { transform: translateX(8px); border-color: var(--accent); }
 }
 
 /* phones: name + nav pill don't fit on one row; the hero already shows the name */
@@ -46,21 +75,18 @@ html.lenis body {
   .nav a { padding: 9px 10px !important; }
 }
 
-/* the puzzle tab poking out of a card's right edge */
+/* the puzzle tab on a card's right edge: the outer half of a circle, drawn over the card's own border */
 .knob::after {
   content: "";
   position: absolute;
-  right: -14px;
+  right: -15px;
   top: calc(50% - 15px);
   width: 30px;
   height: 30px;
+  box-sizing: border-box;
   border-radius: 50%;
-  background: var(--knob);
+  border: 1px solid;
+  border-color: inherit;
+  background: var(--surface);
+  clip-path: inset(0 0 0 50%);
 }
-
-/* card glitter loops; the layers are added in Index.tsx and only run in sections on stage (.live) */
-[data-sec]:not(.live) [data-glit],
-[data-sec]:not(.live) [data-glit] > div { animation-play-state: paused !important; }
-@keyframes glitA { to { opacity: 0.3; } }
-@keyframes glitB { to { opacity: 0.95; } }
-@keyframes sheen { 40%, 100% { transform: translateX(330%); } }

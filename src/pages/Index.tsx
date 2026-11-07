@@ -12,17 +12,7 @@ const RESUME_URL = "/assets/Shri_Ram_Dwivedi_AI_Engineer.pdf";
 // static page in public/ramv1; the explicit index.html also resolves under `npm run dev`
 const SHOWCASE = "/ramv1/index.html";
 
-const INK = "#16150f";
-const MONO = "'Geist Mono', monospace";
-const GLOW = "radial-gradient(120% 90% at 0% 0%, rgba(255,255,255,0.6), rgba(255,255,255,0) 55%)";
-
-/* one tone per section: label colour, card gradient, shadow tint, puzzle-tab colour, text colours */
-type Tone = { tag: string; card: string; shadow: string; knob?: string; meta?: string; text: string };
-const VIOLET: Tone = { tag: "#57536b", card: "#f1edff 0%, #ddd3ff 55%, #c9bbff 100%", shadow: "60,40,120", knob: "#d6caff", meta: "#4b4566", text: "#2c2938" };
-const BLUE: Tone = { tag: "#46566b", card: "#edf6ff 0%, #d2e7ff 55%, #b6d7ff 100%", shadow: "20,60,120", knob: "#c6e0ff", meta: "#3e4d61", text: "#25303d" };
-const AMBER: Tone = { tag: "#655a3c", card: "#fff7de 0%, #ffe8ae 55%, #ffd585 100%", shadow: "120,80,20", knob: "#ffe09c", text: "#3a3222" };
-const GREEN: Tone = { tag: "#4c5e3f", card: "#f0fae3 0%, #d8f0bd 55%, #bfe6a0 100%", shadow: "40,90,20", text: "#2c3825" };
-const PEACH: Tone = { tag: "#6b5040", card: "#fff3ea 0%, #ffe2cf 55%, #ffcdb0 100%", shadow: "140,80,40", knob: "#ffd2bb", meta: "#6a4c3e", text: "#3d2c22" };
+/* colours are CSS variables in index.css; section tints and boards are picked in OKLCH at equal lightness */
 
 const RAMV1_SPECS = ["826,465 parameters", "4 blocks × 4 heads", "64-character context", "Trained in 9.4 min on a CPU"];
 
@@ -100,13 +90,13 @@ const STACK = [
 ];
 
 /* the 4:5 stat boards — the travelling puzzle is cut from these */
-type Art = { label: string; n: string; stat: ReactNode; size: string; lh: number; caption: string; grad: string[] };
+type Art = { label: string; n: string; stat: ReactNode; size: string; lh: number; caption: string; color: string };
 
 const ART: Record<string, Art> = {
-  ryze: { label: "Ryze AI", n: "01", stat: "1,000+", size: "24cqw", lh: 0.82, caption: "concurrent users on one agent platform", grad: ["#ddd3ff", "#a991ff", "#7a63f5"] },
-  realfy: { label: "Realfy Oasis", n: "02", stat: "98%", size: "40cqw", lh: 0.8, caption: "face verification accuracy, 500+ checks a day", grad: ["#d2ebff", "#82bcff", "#4a86f7"] },
-  leastwise: { label: "LeastWise", n: "03", stat: <>227<br />→ 48</>, size: "27cqw", lh: 0.84, caption: "IAM permissions, zero dangerous removals", grad: ["#fff3b0", "#ffd04f", "#ffa23a"] },
-  kalinga: { label: "Kalinga University", n: "04", stat: "9.46", size: "36cqw", lh: 0.8, caption: "CGPA, B.Tech CS (AI/ML), class of 2027", grad: ["#e6f9ab", "#a8e05c", "#4fbf6a"] },
+  ryze: { label: "Ryze AI", n: "01", stat: "1,000+", size: "24cqw", lh: 0.82, caption: "concurrent users on one agent platform", color: "#f5bfb1" },
+  realfy: { label: "Realfy Oasis", n: "02", stat: "98%", size: "40cqw", lh: 0.8, caption: "face verification accuracy, 500+ checks a day", color: "#aad5ef" },
+  leastwise: { label: "LeastWise", n: "03", stat: <>227<br />→ 48</>, size: "27cqw", lh: 0.84, caption: "IAM permissions, zero dangerous removals", color: "#e4d998" },
+  kalinga: { label: "Kalinga University", n: "04", stat: "9.46", size: "36cqw", lh: 0.8, caption: "CGPA, B.Tech CS (AI/ML), class of 2027", color: "#addbbb" },
 };
 
 /* ------------------------------ puzzle maths ------------------------------ */
@@ -143,48 +133,6 @@ function jigsaw(W: number, H: number, C: number, R: number, M: number) {
   return out;
 }
 
-/* procedural textures for the card glitter */
-function glitterTex(seed: number) {
-  const S = 200, c = document.createElement("canvas");
-  c.width = c.height = S;
-  const x = c.getContext("2d")!;
-  let r = seed;
-  const R = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const tints = ["255,255,255", "255,255,255", "255,255,255", "255,214,240", "210,240,255", "255,240,200"];
-  for (let i = 0; i < 70; i++) {
-    const px = R() * S, py = R() * S, sz = 0.35 + Math.pow(R(), 3) * 1.6, a = 0.5 + R() * 0.5, t = tints[Math.floor(R() * tints.length)];
-    const g = x.createRadialGradient(px, py, 0, px, py, sz * 2.6);
-    g.addColorStop(0, `rgba(${t},${a})`);
-    g.addColorStop(0.35, `rgba(${t},${a * 0.6})`);
-    g.addColorStop(1, `rgba(${t},0)`);
-    x.fillStyle = g;
-    x.beginPath();
-    x.arc(px, py, sz * 2.6, 0, Math.PI * 2);
-    x.fill();
-    if (sz > 1.35) {
-      x.strokeStyle = `rgba(${t},${a * 0.8})`;
-      x.lineWidth = 0.6;
-      x.beginPath();
-      x.moveTo(px - sz * 5, py); x.lineTo(px + sz * 5, py);
-      x.moveTo(px, py - sz * 5); x.lineTo(px, py + sz * 5);
-      x.stroke();
-    }
-  }
-  return c.toDataURL();
-}
-
-function grainTex() {
-  const S = 140, c = document.createElement("canvas");
-  c.width = c.height = S;
-  const x = c.getContext("2d")!, im = x.createImageData(S, S);
-  for (let i = 0; i < im.data.length; i += 4) {
-    im.data[i] = im.data[i + 1] = im.data[i + 2] = Math.random() * 255;
-    im.data[i + 3] = 46;
-  }
-  x.putImageData(im, 0, 0);
-  return c.toDataURL();
-}
-
 /* ------------------------------- components ------------------------------- */
 
 /* side gutter: 5vw, widening on very large screens so content tops out at 1400px */
@@ -192,17 +140,11 @@ const GX = "max(5vw, calc((100% - 1400px) / 2))";
 const GRID = "repeat(auto-fit,minmax(min(100%,440px),1fr))";
 const SECTION: CSSProperties = { position: "relative", minHeight: "100vh", boxSizing: "border-box", padding: `14vh ${GX}`, display: "grid", gridTemplateColumns: GRID, gap: "64px 6vw", alignItems: "center" };
 const COLUMN: CSSProperties = { display: "flex", flexDirection: "column", gap: 32, minWidth: 0 };
-const TAG: CSSProperties = { fontFamily: MONO, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" };
+const TAG: CSSProperties = { fontSize: 15, fontWeight: 500, color: "var(--accent)" };
 const H2: CSSProperties = { margin: 0, fontWeight: 600, fontSize: "clamp(46px,5.4vw,100px)", lineHeight: 0.92, letterSpacing: "-0.045em", textWrap: "balance" };
 const BTN: CSSProperties = { display: "flex", alignItems: "center", height: 54, borderRadius: 999, fontWeight: 500, fontSize: 16 };
-const BTN_SOLID: CSSProperties = { ...BTN, padding: "0 26px", background: INK, color: "#fff" };
-const BTN_LINE: CSSProperties = { ...BTN, padding: "0 24px", border: `1.5px solid ${INK}` };
-
-const cardStyle = (t: Tone): CSSProperties => ({
-  position: "relative", display: "flex", flexDirection: "column", borderRadius: 22, isolation: "isolate",
-  background: `${GLOW}, linear-gradient(135deg, ${t.card})`,
-  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.8), 0 18px 40px -26px rgba(${t.shadow},0.45)`,
-});
+const BTN_SOLID: CSSProperties = { ...BTN, padding: "0 26px", background: "var(--accent)", color: "#fff" };
+const BTN_LINE: CSSProperties = { ...BTN, padding: "0 24px", border: "1px solid var(--line-strong)" };
 
 /* the photo board when `art` is absent */
 function Board({ art }: { art?: Art }) {
@@ -211,8 +153,8 @@ function Board({ art }: { art?: Art }) {
       {/* 62vh keeps the whole board on screen in landscape phones */}
       <div data-board style={{ position: "relative", width: "min(410px,78vw,62vh)", aspectRatio: "4/5" }}>
         {art ? (
-          <div data-art data-grad={art.grad.join(" ")} style={{ position: "absolute", inset: 0, containerType: "size", overflow: "hidden", background: `${GLOW}, linear-gradient(150deg, ${art.grad[0]} 0%, ${art.grad[1]} 48%, ${art.grad[2]} 100%)` }}>
-            <div style={{ position: "absolute", left: "8cqw", right: "8cqw", top: "8cqw", display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: "3.6cqw", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          <div data-art data-color={art.color} style={{ position: "absolute", inset: 0, containerType: "size", overflow: "hidden", background: art.color }}>
+            <div style={{ position: "absolute", left: "8cqw", right: "8cqw", top: "8cqw", display: "flex", justifyContent: "space-between", fontSize: "4.4cqw", fontWeight: 500 }}>
               <span>{art.label}</span>
               <span>{art.n}</span>
             </div>
@@ -231,39 +173,38 @@ function Board({ art }: { art?: Art }) {
   );
 }
 
-/* role / project card; links get a tighter fit and slide on hover; compact = grid-sized, no puzzle tab */
-function Card({ tone, name, meta, body, href, live, compact }: Entry & { tone: Tone; compact?: boolean }) {
-  const style = { ...cardStyle(tone), gap: href ? 10 : 12, padding: compact ? "20px 22px" : href ? "22px 28px" : "26px 28px", "--knob": tone.knob } as CSSProperties;
-  const cls = [!compact && "knob", href && "lift"].filter(Boolean).join(" ");
+/* role / project card (.card in index.css, same everywhere); links slide on hover; compact = grid-sized, no puzzle tab */
+function Card({ name, meta, body, href, live, compact }: Entry & { compact?: boolean }) {
+  const cls = ["card", !compact && "knob", href && "lift"].filter(Boolean).join(" ");
   const inner = (
     <>
-      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "4px 12px", flexDirection: compact ? "column" : undefined, flexWrap: href ? undefined : "wrap" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "4px 12px", flexDirection: compact ? "column" : undefined, flexWrap: href ? undefined : "wrap" }}>
         <span style={{ fontWeight: 600, fontSize: compact ? 21 : 26, letterSpacing: compact ? "-0.03em" : "-0.035em" }}>{name}</span>
-        <span style={{ fontSize: 14, color: tone.meta }}>{meta}</span>
+        <span style={{ fontSize: 14, color: "var(--ink-3)" }}>{meta}</span>
       </div>
-      <p style={{ position: "relative", margin: 0, fontSize: compact ? 15 : 16, lineHeight: compact ? 1.5 : 1.55, color: tone.text, textWrap: "pretty" }}>{body}</p>
+      <p style={{ margin: 0, fontSize: compact ? 15 : 16, lineHeight: compact ? 1.5 : 1.55, color: "var(--ink-2)", textWrap: "pretty" }}>{body}</p>
       {live && (
-        <a href={live} target="_blank" rel="noreferrer" style={{ position: "relative", alignSelf: "flex-start", fontSize: 14, fontWeight: 500, borderBottom: `1px solid ${INK}` }}>
+        <a href={live} target="_blank" rel="noreferrer" style={{ alignSelf: "flex-start", fontSize: 14, fontWeight: 500, color: "var(--accent)", borderBottom: "1px solid currentColor" }}>
           See it live ↗
         </a>
       )}
     </>
   );
   return href ? (
-    <a data-reveal data-card href={href} target="_blank" rel="noreferrer" className={cls} style={style}>{inner}</a>
+    <a data-reveal href={href} target="_blank" rel="noreferrer" className={cls}>{inner}</a>
   ) : (
-    <article data-reveal data-card className={cls} style={style}>{inner}</article>
+    <article data-reveal className={cls}>{inner}</article>
   );
 }
 
 /* board on one side, label + heading + content on the other */
 /* top: for sections taller than the screen, so the board (where the puzzle lands) stays near the top */
-function Split({ id, tint, tone, tag, title, art, textFirst, top, children }: {
-  id?: string; tint: string; tone: Tone; tag: string; title: string; art: Art; textFirst?: boolean; top?: boolean; children: ReactNode;
+function Split({ id, tint, tag, title, art, textFirst, top, children }: {
+  id?: string; tint: string; tag: string; title: string; art: Art; textFirst?: boolean; top?: boolean; children: ReactNode;
 }) {
   const text = (
     <div style={COLUMN}>
-      <div data-reveal style={{ ...TAG, color: tone.tag }}>{tag}</div>
+      <div data-reveal style={TAG}>{tag}</div>
       <h2 data-reveal style={H2}>{title}</h2>
       {children}
     </div>
@@ -342,30 +283,6 @@ const Index = () => {
     addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseover", onOver);
 
-    /* glitter: shared textures, CSS opacity/transform loops (keyframes in index.css) */
-    const rootStyle = document.documentElement.style;
-    if (!rootStyle.getPropertyValue("--glitA")) {
-      rootStyle.setProperty("--grain", `url(${grainTex()})`);
-      rootStyle.setProperty("--glitA", `url(${glitterTex(7)})`);
-      rootStyle.setProperty("--glitB", `url(${glitterTex(1931)})`);
-    }
-    qa("[data-card]").forEach((card, i) => {
-      qa("[data-glit]", card).forEach((g) => g.remove());
-      const layer = (css: string) => {
-        const d = document.createElement("div");
-        d.setAttribute("data-glit", "");
-        d.style.cssText = "position:absolute;inset:0;border-radius:inherit;pointer-events:none;" + css;
-        card.prepend(d);
-        return d;
-      };
-      const dur = 1.1 + (i % 4) * 0.3;
-      layer("overflow:hidden;").appendChild(document.createElement("div")).style.cssText =
-        `position:absolute;top:0;bottom:0;left:-60%;width:60%;background:linear-gradient(105deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.45) 50%,rgba(255,255,255,0) 100%);animation:sheen ${5 + (i % 3)}s cubic-bezier(.45,0,.55,1) ${i * 0.3}s infinite;`;
-      layer(`background-image:var(--glitB);background-size:190px 190px;background-position:37px 61px;opacity:.35;animation:glitB ${dur * 1.2}s ease-in-out .4s infinite alternate;`);
-      layer(`background-image:var(--glitA);background-size:200px 200px;opacity:.9;animation:glitA ${dur}s ease-in-out infinite alternate;`);
-      layer("background-image:var(--grain);background-size:140px 140px;mix-blend-mode:overlay;opacity:.85;");
-    });
-
     /* rasterise each board once, so puzzle pieces are just clipped backgrounds */
     let urls: string[] = [];
     const renderArts = async () => {
@@ -386,22 +303,8 @@ const Index = () => {
           x.fillRect(0, 0, W, H);
           if (iw) x.drawImage(img, (W - iw * sc) * 0.5, (H - ih * sc) * 0.32, iw * sc, ih * sc);
         } else {
-          // linear-gradient(150deg, c0 0%, c1 48%, c2 100%) …
-          const cols = art.dataset.grad!.split(" ");
-          const a = (150 * Math.PI) / 180, dx = Math.sin(a), dy = -Math.cos(a), L = Math.abs(W * dx) + Math.abs(H * dy);
-          const g = x.createLinearGradient(W / 2 - (dx * L) / 2, H / 2 - (dy * L) / 2, W / 2 + (dx * L) / 2, H / 2 + (dy * L) / 2);
-          [0, 0.48, 1].forEach((s, i) => g.addColorStop(s, cols[i]));
-          x.fillStyle = g;
+          x.fillStyle = art.dataset.color!;
           x.fillRect(0, 0, W, H);
-          // … under GLOW: an ellipse 120% × 90% of the box, white .6 fading out at 55%
-          x.save();
-          x.scale(1.2 * W, 0.9 * H);
-          const rg = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-          rg.addColorStop(0, "rgba(255,255,255,0.6)");
-          rg.addColorStop(0.55, "rgba(255,255,255,0)");
-          x.fillStyle = rg;
-          x.fillRect(0, 0, 1, 1);
-          x.restore();
           // every word, drawn where the browser laid it out
           const tw = document.createTreeWalker(art, NodeFilter.SHOW_TEXT), range = document.createRange();
           while (tw.nextNode()) {
@@ -516,7 +419,6 @@ const Index = () => {
         const proto = el.cloneNode(true) as HTMLElement;
         proto.removeAttribute("data-reveal");
         proto.removeAttribute("id");
-        qa("[data-glit]", proto).forEach((g) => g.remove());
         Object.assign(proto.style, { position: "absolute", left: "0", top: "0", margin: "0", width: W + "px", height: H + "px", boxSizing: "border-box", transform: "none", opacity: "1" });
         const ps = jigsaw(W, H, C, R, 40).map((j) => {
           // moving wrapper = GPU layer; the clip sits on a plain child so it's painted into that layer
@@ -586,7 +488,6 @@ const Index = () => {
         bgK = k;
         bgA.style.background = tints[k];
         bgB.style.background = tints[Math.min(k + 1, n - 1)];
-        secs.forEach((s, i) => s.classList.toggle("live", i === k || i === k + 1)); // glitter only animates here
       }
       const o = ease(e).toFixed(3);
       if (o !== lastO) bgB.style.opacity = lastO = o;
@@ -674,77 +575,76 @@ const Index = () => {
       <div data-bg aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", willChange: "opacity" }} />
       <div data-bg aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", willChange: "opacity", opacity: 0 }} />
       <div data-puzzle aria-hidden style={{ position: "absolute", left: 0, top: 0, zIndex: 20, pointerEvents: "none", opacity: 0, willChange: "opacity" }} />
-      <div data-cursor-ring style={{ display: "none", position: "fixed", left: 0, top: 0, width: 34, height: 34, margin: "-17px 0 0 -17px", border: `1.5px solid ${INK}`, borderRadius: "50%", zIndex: 300, pointerEvents: "none" }} />
-      <div data-cursor-dot style={{ display: "none", position: "fixed", left: 0, top: 0, width: 6, height: 6, margin: "-3px 0 0 -3px", background: INK, borderRadius: "50%", zIndex: 301, pointerEvents: "none" }} />
+      <div data-cursor-ring style={{ display: "none", position: "fixed", left: 0, top: 0, width: 34, height: 34, margin: "-17px 0 0 -17px", border: "1.5px solid var(--ink)", borderRadius: "50%", zIndex: 300, pointerEvents: "none" }} />
+      <div data-cursor-dot style={{ display: "none", position: "fixed", left: 0, top: 0, width: 6, height: 6, margin: "-3px 0 0 -3px", background: "var(--ink)", borderRadius: "50%", zIndex: 301, pointerEvents: "none" }} />
 
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24, padding: `22px ${GX}`, pointerEvents: "none" }}>
         <a href="#top" className="brand" style={{ pointerEvents: "auto", fontWeight: 600, fontSize: 19, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>Shri Ram Dwivedi</a>
         <nav className="nav" style={{
           pointerEvents: "auto", display: "flex", gap: 2, alignItems: "center", height: 46, padding: "0 5px", borderRadius: 999,
-          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(18px) saturate(160%)", WebkitBackdropFilter: "blur(18px) saturate(160%)",
-          border: "1px solid rgba(255,255,255,0.8)", boxShadow: "inset 0 1px 0 #fff, 0 10px 28px -16px rgba(30,25,15,0.35)", fontSize: 14, fontWeight: 500,
+          background: "var(--surface)", border: "1px solid var(--line)", fontSize: 14, fontWeight: 500,
         }}>
           {[["#experience", "Work"], ["#projects", "Projects"], ["#toolkit", "Toolkit"]].map(([h, t]) => (
             <a key={h} href={h} className="pill" style={{ padding: "9px 14px", borderRadius: 999 }}>{t}</a>
           ))}
-          <a href="#contact" style={{ padding: "9px 16px", borderRadius: 999, background: INK, color: "#fff" }}>Contact</a>
+          <a href="#contact" style={{ padding: "9px 16px", borderRadius: 999, background: "var(--accent)", color: "#fff" }}>Contact</a>
         </nav>
       </header>
 
       <main id="top" style={{ position: "relative", zIndex: 2 }}>
-        <section data-sec data-tint="#f6f3ee" style={{ ...SECTION, padding: `130px ${GX} 10vh` }}>
+        <section data-sec data-tint="#f6faf8" style={{ ...SECTION, padding: `130px ${GX} 10vh` }}>
           <div style={{ ...COLUMN, gap: 30 }}>
             <h1 data-reveal style={{ margin: 0, fontWeight: 600, fontSize: "clamp(68px,9vw,172px)", lineHeight: 0.86, letterSpacing: "-0.05em" }}>Shri Ram<br />Dwivedi</h1>
-            <p data-reveal style={{ margin: 0, maxWidth: 440, fontSize: "clamp(18px,1.4vw,21px)", lineHeight: 1.45, letterSpacing: "-0.012em", color: "#34322b", textWrap: "pretty" }}>
+            <p data-reveal style={{ margin: 0, maxWidth: 440, fontSize: "clamp(18px,1.4vw,21px)", lineHeight: 1.45, letterSpacing: "-0.012em", color: "var(--ink-2)", textWrap: "pretty" }}>
               I build AI agents that plan, use tools and remember, then ship them to production for thousands of users.
             </p>
             <div data-reveal style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               <a href="#experience" style={BTN_SOLID}>See the work</a>
               <a href={RESUME_URL} target="_blank" rel="noreferrer" style={BTN_LINE}>Résumé ↗</a>
             </div>
-            <div data-reveal style={{ fontSize: 14, color: "#5d5a52" }}>Open to AI engineering roles. Graduating 2027.</div>
+            <div data-reveal style={{ fontSize: 14, color: "var(--ink-3)" }}>Open to AI engineering roles. Graduating 2027.</div>
           </div>
           <Board />
         </section>
 
-        <Split id="experience" tint="#efebfb" tone={VIOLET} tag="01 · Experience" title="Agents that do the job themselves." art={ART.ryze}>
+        <Split id="experience" tint="#fef0ec" tag="01 · Experience" title="Agents that do the job themselves." art={ART.ryze}>
           <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingRight: 16 }}>
-            {WORK.map((w) => <Card key={w.name} tone={VIOLET} {...w} />)}
+            {WORK.map((w) => <Card key={w.name} {...w} />)}
           </div>
         </Split>
 
-        <Split tint="#eaf3fd" tone={BLUE} tag="02 · Perception" title="Machines that see, in real time." art={ART.realfy} textFirst>
+        <Split tint="#eaf6fd" tag="02 · Perception" title="Machines that see, in real time." art={ART.realfy} textFirst>
           <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingRight: 16 }}>
-            {VISION.map((w) => <Card key={w.name} tone={BLUE} {...w} />)}
+            {VISION.map((w) => <Card key={w.name} {...w} />)}
           </div>
         </Split>
 
-        <Split id="projects" tint="#fbf4e1" tone={AMBER} tag="03 · Projects" title="Built, tested, shipped." art={ART.leastwise} top>
+        <Split id="projects" tint="#f6f4e8" tag="03 · Projects" title="Built, tested, shipped." art={ART.leastwise} top>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingRight: 16 }}>
-            {FEATURED.map((w) => <Card key={w.name} tone={AMBER} {...w} />)}
+            {FEATURED.map((w) => <Card key={w.name} {...w} />)}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,230px),1fr))", gap: 16 }}>
-              {PROJECTS.map((w) => <Card key={w.name} tone={AMBER} compact {...w} />)}
+              {PROJECTS.map((w) => <Card key={w.name} compact {...w} />)}
             </div>
           </div>
         </Split>
 
         {/* RamV1 milestone: its showcase lives in public/ramv1; the board is the architecture diagram */}
-        <section id="ramv1" data-sec data-tint="#f9efe7" style={{ ...SECTION, alignItems: "start" }}>
+        <section id="ramv1" data-sec data-tint="#fcf1e9" style={{ ...SECTION, alignItems: "start" }}>
           <div style={COLUMN}>
-            <div data-reveal style={{ ...TAG, color: PEACH.tag }}>Milestone · GenAI journey</div>
+            <div data-reveal style={TAG}>Milestone · GenAI journey</div>
             <h2 data-reveal style={H2}>A transformer, written by hand.</h2>
-            <p data-reveal style={{ margin: 0, maxWidth: 520, fontSize: 18, lineHeight: 1.5, color: "#34322b", textWrap: "pretty" }}>
+            <p data-reveal style={{ margin: 0, maxWidth: 520, fontSize: 18, lineHeight: 1.5, color: "var(--ink-2)", textWrap: "pretty" }}>
               A milestone in my GenAI journey: RamV1, a character-level GPT I built from scratch in PyTorch.
             </p>
             <div style={{ paddingRight: 16 }}>
               <Card
-                tone={PEACH} name="Why it matters to me" meta=""
+                name="Why it matters to me" meta=""
                 body="I build agents on top of large language models every day. RamV1 is me opening the box: attention, masking, the training loop and the sampler, each written line by line with no pretrained weights. Now every number in that diagram is one I understand, and the six bugs it took to get there taught me more about PyTorch than reading ever did."
               />
             </div>
             <div data-reveal style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {RAMV1_SPECS.map((s) => (
-                <span key={s} style={{ fontFamily: MONO, fontSize: 12, padding: "7px 12px", borderRadius: 999, border: "1px solid rgba(22,21,15,0.18)", color: PEACH.text }}>{s}</span>
+                <span key={s} style={{ fontSize: 14, fontVariantNumeric: "tabular-nums", padding: "6px 10px", borderRadius: 8, background: "var(--chip)", color: "var(--ink-2)" }}>{s}</span>
               ))}
             </div>
             <div data-reveal style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -770,27 +670,27 @@ const Index = () => {
           </div>
         </section>
 
-        <Split id="toolkit" tint="#edf6e4" tone={GREEN} tag="04 · Toolkit" title="The stack behind it." art={ART.kalinga} textFirst top>
+        <Split id="toolkit" tint="#ecf7ef" tag="04 · Toolkit" title="The stack behind it." art={ART.kalinga} textFirst top>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,220px),1fr))", gap: 16, paddingRight: 16 }}>
             {STACK.map(([k, v], i) => (
-              <div key={k} data-reveal data-card style={{ ...cardStyle(GREEN), gap: 10, padding: "22px 24px", gridColumn: i === STACK.length - 1 ? "1 / -1" : undefined }}>
-                <span style={{ position: "relative", fontWeight: 600, fontSize: 21, letterSpacing: "-0.03em" }}>{k}</span>
-                <span style={{ position: "relative", fontSize: 15, lineHeight: 1.5, color: GREEN.text }}>{v}</span>
+              <div key={k} data-reveal className="card" style={{ gridColumn: i === STACK.length - 1 ? "1 / -1" : undefined }}>
+                <span style={{ fontWeight: 600, fontSize: 21, letterSpacing: "-0.03em" }}>{k}</span>
+                <span style={{ fontSize: 15, lineHeight: 1.5, color: "var(--ink-2)" }}>{v}</span>
               </div>
             ))}
           </div>
-          <p data-reveal style={{ margin: 0, fontSize: 16, lineHeight: 1.55, color: GREEN.text, textWrap: "pretty" }}>
+          <p data-reveal style={{ margin: 0, fontSize: 16, lineHeight: 1.55, color: "var(--ink-2)", textWrap: "pretty" }}>
             B.Tech Computer Science (AI/ML), Kalinga University. 1st of 50+ teams at the institutional startup competition. Google Cloud Generative AI Leader.
           </p>
         </Split>
 
-        <section id="contact" data-sec data-tint="#f6f3ee" style={{ position: "relative", minHeight: "100vh", boxSizing: "border-box", padding: `14vh ${GX} 36px`, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "8vh" }}>
+        <section id="contact" data-sec data-tint="#f6faf8" style={{ position: "relative", minHeight: "100vh", boxSizing: "border-box", padding: `14vh ${GX} 36px`, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "8vh" }}>
           <div style={{ display: "grid", gridTemplateColumns: GRID, gap: "64px 6vw", alignItems: "center", flex: 1 }}>
             <Board />
             <div style={{ ...COLUMN, gap: 30 }}>
-              <div data-reveal style={{ ...TAG, color: "#5d5a52" }}>05 · Contact</div>
+              <div data-reveal style={TAG}>05 · Contact</div>
               <h2 data-reveal style={H2}>The last piece is you.</h2>
-              <p data-reveal style={{ margin: 0, maxWidth: 440, fontSize: 18, lineHeight: 1.5, color: "#34322b", textWrap: "pretty" }}>
+              <p data-reveal style={{ margin: 0, maxWidth: 440, fontSize: 18, lineHeight: 1.5, color: "var(--ink-2)", textWrap: "pretty" }}>
                 Have an opportunity, or an idea you want to build together? I would love to hear about it.
               </p>
               <div data-reveal style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -799,15 +699,15 @@ const Index = () => {
                 <a href={GITHUB} target="_blank" rel="noreferrer" style={{ ...BTN_LINE, padding: "0 22px" }}>GitHub ↗</a>
               </div>
               <div data-reveal style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
-                <span style={{ ...TAG, color: "#5d5a52", flexBasis: "100%" }}>See my work live</span>
+                <span style={{ ...TAG, color: "var(--ink-3)", flexBasis: "100%" }}>See my work live</span>
                 <a href={RYZE_LIVE} target="_blank" rel="noreferrer" style={{ ...BTN_LINE, height: 44, padding: "0 18px", fontSize: 15 }}>Ryze AI ↗</a>
                 <a href={SCALIX_LIVE} target="_blank" rel="noreferrer" style={{ ...BTN_LINE, height: 44, padding: "0 18px", fontSize: 15 }}>ScalixAI Ads ↗</a>
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 20, borderTop: "1px solid rgba(22,21,15,0.15)", paddingTop: 20, fontSize: 14, color: "#5d5a52" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 20, borderTop: "1px solid var(--line)", paddingTop: 20, fontSize: 14, color: "var(--ink-3)" }}>
             <span>© 2026 Shri Ram Dwivedi</span>
-            <a href={RESUME_URL} target="_blank" rel="noreferrer" style={{ color: INK }}>Download résumé ↗</a>
+            <a href={RESUME_URL} target="_blank" rel="noreferrer" style={{ color: "var(--ink)" }}>Download résumé ↗</a>
           </div>
         </section>
       </main>
